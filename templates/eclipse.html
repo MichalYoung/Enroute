@@ -1,0 +1,80 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html> <head>
+<title>Dart to Darkness</title>
+<link rel="stylesheet"
+      href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<style>
+body {
+    padding: 0;
+    margin: 0;
+}
+html, body, #map {
+    height: 100%;
+}
+.rider-icon { background-color: #00cc00;
+               color: #ff0000;
+               width: auto; }
+         }
+</style>
+<script
+  src="https://code.jquery.com/jquery-3.2.1.min.js"
+  integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+  crossorigin="anonymous"></script>
+</head>
+
+<body>
+
+<div id="map" style="height: 100%;"></div>
+<div id="log"></div>
+
+<script src="static/js/dist/enroute.js"></script>
+
+<script>
+
+
+
+var options = {
+    center:  [44.709248,-122.8550084],
+    zoom: 8,
+    spot_feeds: [
+       { name: "Michal Young",
+        feed: "0GiLP5jn9iVj8z8qm90QaTnkpygdAmouk", 
+        color: "#0066ff"
+       },
+
+       { name: "Holden Hughart",
+        feed: "0gcbXbcYl7OvOGDb3HLx4DTI00EzjYqZJ", 
+        color: "#006600"
+       },
+
+       { name: "Lynne Fitzsimmons",
+        feed: "0VMqdoAtvZtPTNMNZJVZa5jhHdej3zLqM", 
+        color: "#9966ff"
+       },
+
+       { name: "John Pearch",
+        feed: "01edrQUs5lV9T91eLiJqmTIL1W8t4jlUH", 
+        color: "#000000"
+       },
+
+       { name: "Audunn Ludvikson", 
+         feed: "0KmjBle13laiHcqamY7jtcULbPhDO9Zhz",
+         color: "#ff0000"
+       }
+
+   ],
+      routes:  [
+        { gpx: "DariDart", color: "#CC3300" }, 
+        { gpx: "Total", color: "#CC3300" },
+        { gpx: "EclipseThat", color:  "#CC3300" },
+        { gpx: "Escargot", color:  "#CC3300" },
+               ]
+
+}; 
+var tracking = new Enroute(options);
+
+</script>
+
+</body> </html>
