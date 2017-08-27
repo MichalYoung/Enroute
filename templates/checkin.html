@@ -1,0 +1,77 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html> <head>
+
+<link rel="stylesheet"
+ href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css"
+ integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M"
+ crossorigin="anonymous">
+
+<meta name="viewport" content="width=device-width, initial-scale=1,
+shrink-to-fit=no">
+
+<title>Check in</title>
+</head>
+
+
+<body>
+<div class="container">
+
+<form id="checkin">
+<div class="row">
+   <div class="col-md-6">
+   <button type="button" id="locate">Get location</button>
+   </div>
+   <div class="col-md-6">
+     <label>Latitude</label><label id="lat">(unknown)</label>
+     <label>Longitude</label><label id="lon">(unknown)</label>
+   </div> <!-- column -->
+   </dir> <!-- row -->
+</form>
+
+</div> <!-- container -->
+
+<!-- Bootstrap wants JavaScript at the end -->
+ <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script
+ src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js"
+ integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1"
+crossorigin="anonymous"></script>
+
+<script>
+$("#checkin").submit( function(event) {
+  event.preventDefault();
+  console.log("Form submission has been disabled")
+});
+
+// When the button is clicked, we attempt to
+// get and display the user's location.
+
+var geolocate_options = {
+  enableHighAccuracy: true,
+  timeout: 5000,
+  maximumAge: 0
+};
+
+function geolocate_success(pos) {
+   console.log("Geolocation succeeded");
+    $("#lat").html(pos.coords.latitude);
+    $("#lon").html(pos.coords.longitude);
+}
+
+function geolocate_error(err) {
+  console.warn(`ERROR(${err.code}): ${err.message}`);
+};
+
+function locate(click) {
+  if (navigator.geolocation) {
+     navigator.geolocation.getCurrentPosition(geolocate_success,
+         geolocate_error, geolocate_options);
+  } else {
+      alert("This browser does not support geolocation");
+  }
+}
+
+$("#locate").click(locate); 
+</script>
+
+</body> </html>
