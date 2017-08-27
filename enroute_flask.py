@@ -41,6 +41,17 @@ def index():
 def eclipse():
     return flask.render_template("eclipse.html")
 
+### Experimental: Phone checkin
+@app.route('/checkin')
+def checkin():
+    return flask.render_template("checkin.html")
+
+@app.route('/_checkin', methods=["POST"])
+def _checkin():
+    """AJAX responder to checkin"""
+    app.logger.debug("Received _checkin")
+    return json.dumps( { "reply": "Got it" } ) 
+
 
 ######
 # Ajax handlers
