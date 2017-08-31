@@ -1,6 +1,6 @@
 """
 Measure distances along a path represented as lat-lon pairs. 
-(Experimental August 2017)
+(Experimental August 2017)c
 """
 
 import geopy.distance
@@ -14,6 +14,18 @@ import logging
 logging.basicConfig(format='%(levelname)s:%(message)s',
                         level=logging.INFO)
 log = logging.getLogger(__name__)
+
+# --------------------------------------
+# Parameter constants
+# --------------------------------------
+
+# Upper bound on distance from mapped route for us
+# to calculate a "distance along route"
+#
+MAX_DEVIANCE_METERS = 3000        # 3km
+
+# --------------------------------------
+
 
 def dist_km( p1, p2 ):
     """Distance in kilometers between p1=(lat1, lon1) and p2=(lat2, lon2). 
@@ -49,6 +61,20 @@ def utm_dist(p1, p2):
     dist_kilometers = dist_meters / 1000.0
     return dist_kilometers
 
+def utm_seg_lengths( path ):
+    """For testing: Print the length of each segment, and sum them"""
+    sum = 0
+    prev = path[0]
+    for pt in path:
+        e1, n1, d1 = prev
+        e2, n2, d2 = pt
+        de = e2-e1
+        dn = n2-n1
+        seg_dist = math.sqrt(de*de + dn*dn)
+        sum += seg_dist
+        print("Seg {:2F} tot {:2F} should be {:2F}"
+                  .format(seg_dist / 1000.0, sum / 1000.0, d2))
+        prev = pt
 
 def utm_error( p1, p2 ):
     d_utm = utm_dist(p1, p2)
@@ -63,7 +89,7 @@ def check_dist_pairs( path ):
     prev = path[0]
     for pt in path[1:]:
         err = utm_error(prev, pt)
-        print("{:4F}-{:4F} {:4F} {:4F}  DIFF: {:4F}"
+        print("{:2,.2f}-{:2,.2f} {:2,.2f} {:2,.2f}  DIFF: {:2,.2f}"
                   .format(prev, pt, d_utm, d_vnc, err))
         prev = pt
 
@@ -77,7 +103,7 @@ def total_dist_km( path ):
     prev = path[0]
     for pt in path[1:]:
         seg_dist_km = dist_km(pt, prev)
-        log.debug("dist {:4F} - {:4F} => {:4F}".format(prev, pt, seg_dist_km))
+        log.debug("dist {:2,.2f} - {:2,.2f} => {:2,.2f}".format(prev, pt, seg_dist_km))
         tot_km += seg_dist_km
         prev = pt
     return tot_km
@@ -136,14 +162,104 @@ def track_to_utm(track):
 
     return utm_path, utm_zone
 
-def normal_intersect( seg_p1, seg_p2, p):
+def interpolate_route_distance(lat, lon, utm_track, utm_zone):
+    """
+    If (lat, lon) is within MAX_DEVIANCE_METERS of 
+    a segment on utm_track, calculate distance 
+    to nearest point. 
+    """
+    if len(utm_track) == 0:
+        return 0
+    skipped_point_count = 0
+    measured_point_count = 0
+    new_min_count = 0
+    buffer = MAX_DEVIANCE_METERS
+    max_dev_sqr = MAX_DEVIANCE_METERS * MAX_DEVIANCE_METERS
+    obs_east, obs_north, _, _ = \
+         utm.from_latlon(lat, lon, force_zone_number=utm_zone)
+    min_deviance = 2 * max_dev_sqr
+    interpolated_dist = 0
+    prior = utm_track[0]
+    for pt in utm_track[1:]:
+        prev = prior
+        prior = pt
+        east_1, north_1, dist_km_1 = prev
+        east_2, north_2, dist_km_2 = pt
+        # log.debug("Segment ending at distance {:2,.2f}km".format(dist_km_2))
+        if (obs_east + buffer < min(east_1, east_2)
+            or obs_east - buffer > max(east_1, east_2)
+            or obs_north + buffer < min(north_1, north_2)
+            or obs_north - buffer > max(north_1, north_2)):
+            skipped_point_count += 1
+            continue
+
+        measured_point_count += 1
+        log.debug("Observation {:2,.2f},{:2,.2f}".format(obs_east, obs_north))
+        log.debug(" measure to {:2,.2f},{:2,.2f}".format(east_1, north_1))
+        log.debug("         -> {:2,.2f},{:2,.2f}".format(east_2, north_2))
+
+        close_east, close_north = \
+          closest_point(east_1, north_1,
+                        east_2, north_2,
+                        obs_east, obs_north)
+        dev_sqr = dist_sqr(obs_east, obs_north, close_east, close_north)
+        log.debug("Measured distance {:2,.2f}km"
+                      .format( math.sqrt(dev_sqr) / 1000.0 ))
+        if dev_sqr < min_deviance:
+            log.debug("New min distance found; interpolating")
+            new_min_count += 1
+            min_deviance = dev_sqr
+            _, _, from_dist = prev
+            _, _, to_dist = pt
+            frac = (close_east - east_1) / (east_2 - east_1)
+            log.debug("Interpolating distance at {:2,f} between ".format(frac))
+            log.debug("   between {:2,f}km and {:2,f}km"
+                          .format(from_dist, to_dist))
+            inter_dist = from_dist + frac * (to_dist - from_dist)
+            log.debug("New min distance recorded")
+    log.debug("Skipped {}, measured {}, took new min {} times"
+                  .format(skipped_point_count,
+                              measured_point_count,
+                              new_min_count))
+    if min_deviance > max_dev_sqr:
+        log.debug("Nothing within buffer distance; closest was {}km"
+                      .format(math.sqrt(min_deviance)))
+        return 0
+    return inter_dist
+
+def into_range(val, lim_1, lim_2):
+    """Place val into range lim_1 ... lim_2"""
+    log.debug("Forcing {:2,f} into range".format(val))
+    log.debug("        {:2,f} to".format(lim_1))
+    log.debug("        {:2,f}".format(lim_2))
+    lim_lower =  min(lim_1, lim_2)
+    lim_higher = max(lim_1, lim_2)
+    val = max(val, lim_lower)
+    val = min(val, lim_higher)
+    log.debug("     => {:2,f}".format(val))
+    return val
+
+def closest_point(p1_x, p1_y, p2_x, p2_y, px, py):
+    """Closest point to (px,py) on s=(p1x,p1y)-(p2x,p2y). 
+    It is the point on a normal from p to the line
+    that runs through s, but if that normal is beyond
+    the extent of s, then it will be at an endpoint
+    of the segment. """
+    i_x, i_y = normal_intersect(p1_x, p1_y, p2_x, p2_y, px, py)
+    log.debug("Intersect ray   at {:2,f}, {:2,f}".format(i_x, i_y))
+    log.debug("       on ray      {:2,f}, {:2,f}".format(p1_x, p1_y))
+    log.debug("               ->  {:2,f}, {:2,f}".format(p2_x, p2_y))
+    i_x = into_range(i_x, p1_x, p2_x)
+    i_y = into_range(i_y, p1_y, p2_y)
+    log.debug("Adjusted intersect {:2,f}, {:2,f}".format(i_x, i_y))
+    return (i_x, i_y)
+                                                    
+
+def normal_intersect(p1_x, p1_y, p2_x, p2_y, px, py):
     """
     Find the point at which a line through seg_p1, 
     seg_p2 intersects a normal dropped from p. 
     """
-    p1_x, p1_y = seg_p1
-    p2_x, p2_y = seg_p2
-    px, py = p
 
     # Special cases: slope or normal slope is undefined
     # for vertical or horizontal lines, but the intersections
@@ -161,8 +277,8 @@ def normal_intersect( seg_p1, seg_p2, p):
     seg_b = p1_y - seg_slope * p1_x
     normal_b = py - normal_slope * px
 
-    log.debug("Segment line is y= {} * x + {}".format(seg_slope, seg_b))
-    log.debug("Normal line is  y= {}  *x + {}".format(normal_slope, normal_b))
+    #log.debug("Segment line is y= {} * x + {}".format(seg_slope, seg_b))
+    #log.debug("Normal line is  y= {}  *x + {}".format(normal_slope, normal_b))
 
     # Combining and subtracting the two line equations to solve for
     x_intersect = (seg_b - normal_b) / (normal_slope - seg_slope)
@@ -171,22 +287,23 @@ def normal_intersect( seg_p1, seg_p2, p):
 
     return (x_intersect, y_intersect)
 
-def normal_dist_sqr(seg_p1, seg_p2, p):
-    """Square of distance from p to line through seg_p1 to seg_p2
-    (even if the segment does not extend to the intersection
-    with the normal).  
-    Sqrt is expensive, and may not always be needed. 
+def dist_sqr(x1, y1, x2, y2):
     """
-    ix, iy = normal_intersect(seg_p1, seg_p2, p)
-    px, py = p
-    dx = px - ix
-    dy = py - iy
-    dist = dx*dx + dy*dy
-    return dist
+    Square of distance between (x1,y1) and (x2,y2)
+    (to avoid sqrt except when needed)
+    """
+    dx = x2 - x1
+    dy = y2 - y1
+    dsq = dx*dx + dy*dy
+    return dsq
 
-def normal_dist(seg_p1, seg_p2, p):
-    """Distance (not squared) from p to line through segment."""
-    return math.sqrt(normal_dist_sqr(seg_p1, seg_p2, p))
+# def closest_dist(p1_east, p1_north, 
+#                 p2_east, p2_north,
+#                 px, py):
+#     """Distance (not squared) from p to line through segment."""
+#     return math.sqrt(closest_dist_sqr(p1_east, p1_north,
+#                                      p2_east, p2_north,
+#                                      px, py))
 
 def cli_args():
     """
