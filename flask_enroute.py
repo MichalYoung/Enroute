@@ -16,6 +16,7 @@ import arrow
 import subprocess
 
 import spot
+import measure
 
 
 ###
@@ -50,7 +51,36 @@ def checkin():
 def _checkin():
     """AJAX responder to checkin"""
     app.logger.debug("Received _checkin")
-    return json.dumps( { "reply": "Got it" } ) 
+    return json.dumps( { "reply": "Got it" } )
+
+@app.route('/along_demo')
+def along():
+    return flask.render_template('along.html')
+
+@app.route('/_along')
+def _along():
+    """AJAX responder to request for distance along path"""
+    app.logger.debug("Ajax request for distance along path")
+    try:
+        lat = flask.request.args.get('lat', None, type=float)
+        lon = flask.request.args.get('lng', None, type=float)
+        app.logger.debug("lat, lon = {}, {}".format(lat, lon))
+        track_file = flask.request.args.get('track', '', type=str)
+        file_path = os.path.join("static", "routes",
+                                     track_file)
+        with open(file_path) as f:
+            track_obj = json.load(f)
+            dist = measure.interpolate_route_distance(lat, lon,
+                        track_obj["path"], track_obj["zone"])
+            return flask.jsonify(result=dist)
+    except FileNotFoundError as e: 
+        app.logger.warn("File {} not found".format(track_file))
+        return flask.jsonify(result=0)
+    except Exception as e:
+        app.logger.warn("_along is broken... {}".format(e))
+        raise
+        # return flask.jsonify(result=0)
+        
 
 
 ######
