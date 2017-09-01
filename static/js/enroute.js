@@ -4,8 +4,23 @@ Enroute.js
 
      Tracking randonneurs with Spot satellite trackers. 
      
-     Michal Young, 2014-2015.
+     Michal Young, 2014-2017.
      This version August 2017. 
+
+Example usage: 
+
+var options = {
+    center:  [44.709248,-122.8550084],
+    zoom: 8,
+    routes:  [{ name: "Dari Dart", 
+                points: "DariDart.json", 
+                distances: "DariDartUTM.json"}]
+    spot_feeds: [{ name: "Michal Young",
+        feed: "0GiLP5jn9iVj8z8qm90QaTnkpygdAmouk", 
+        color: "#0066ff"
+       }]
+ }; 
+var tracking = new Enroute(options);
 
 */
 
@@ -25,9 +40,13 @@ function Enroute(options) {
      * Fields in this object: 
      *   this.center :  [ lat, lon ]
      *   this.zoom :  int
+     *   this.utm_file: path to file with UTM coordinates and distances
      *   this.riders : { "Spot feed id": { name: "Rider Name",  color: "#0000FF"
      *                                    marker: {Leaflet marker obj }, 
-     *                                    trace: Leaflet polyline }, 
+     *                                    trace: Leaflet polyline, 
+     *                                    started: iso time string (optional), 
+     *                                    route_utm_file: file path (optonal)
+     *                                    }, 
      *                  "Spot feed id": { ... } }
      *   this.feeds :  [ "Spot feed id", "Spot feed id", ... ]
      *   this.map : Leaflet map object
@@ -59,6 +78,28 @@ function Enroute(options) {
     console.log("Riders: " + riders);
     console.log("Feeds: " + feeds);
 
+    var utm_file = null;
+    if ('utm_file' in options) {
+	utm_file = options.utm_file;
+	this.utm_file = utm_file;
+    }
+
+    var checkin_list = [ ] ;  // Iterate over this to track phone check-ins
+    var checkins = { } ; // Checkin data goes here, indexed by key
+    // Example:
+    //    checkin_list = [ { name: "Michal Young", id: "myoung" }, ... ]
+    //    checkins = { myoung: { name: "Michal Young", lat: 99.9, lon: 99.9,
+    //                           observed: "2017-08-27 13:34:52+0:00" }
+    //                 lynnefitz: { ... }
+    //                 }
+    // 
+
+    if (options.hasOwnProperty("checkins")) {
+	checkins_list = options.checkins;
+	console.log("Got list of phone checkin keys");
+    } else {
+	console.log("No phone checkins registered.")
+    }
 
     var map = L.map('map', {center:  this.center, zoom: this.zoom});
     this.map = map;
@@ -85,52 +126,75 @@ function Enroute(options) {
 	
         marker.bindPopup( options.popup || "No description provided" );
     }; 
+
     
 	
-    this.plot_route = function(routename, rgb, title) {
-	console.log("Requesting track for " + routename);
-	$.get("_get_route?route="+routename,
+    function route_point_describe(latlng, options) {
+	console.log("Describing route point "
+		    + latlng + " on " + options.name);
+	if (options.hasOwnProperty("distances")) {
+	    console.log("has distances");
+	    $.getJSON("/_along", 
+		      { lat: latlng.lat,
+			lng: latlng.lng,
+			track: options.distances },
+		      function (d) {
+			  var dist_km = Math.round(d.result);
+			  var dist_mi = Math.round(d.result * 0.6213); 
+			  var desc = options.name + "\n" +
+			      dist_km + "km (" +
+			      dist_mi + "mi)";
+			  L.popup()
+			      .setLatLng(latlng)
+			      .setContent(desc)
+			      .openOn(map);
+		      });
+	} else {
+	    console.log("no distances"); 
+	    L.popup()
+		.setLatLng(latlng)
+		.setcontent(options.name)
+		.openOn(map);
+	}
+    }
+	    
+
+    function plot_route( options ) {
+	var points_file = options.points;
+	$.get("_get_route?route=" + points_file,
               function(points) {
 		  var route = L.polyline(points,
-					 { color: rgb, weight: 6, opacity: 0.5} );
-		  if (title != "") {
-		      console.log("Attempting to add popup " + title);
-		      route.bindPopup(title);
-		  }
+		      { color: options.color, weight: 6, opacity: 0.5} );
 		  route.on('mouseover', function(e) {
-                      console.log("mouseover");
-		      this.bringToFront();
-  		  });
-		  console.log("Attempting to add route to map");
-		  route.addTo(map);
-		  console.log("Plotted track for " + routename); 
-	      })
-    }; 
+		      console.log('mouseover');
+		      route_point_describe(e.latlng, options);
+		  });
+		  route.addTo(map); 
+	      });
+	console.log("Created route " + options.name);
+    }
+	
+    this.plot_route = plot_route; 
 
     if ('routes' in options) {
 		console.log("Plotting routes ...");
 		for (var i=0; i < options.routes.length; ++i) {
-	    	var route = options.routes[i]
-	    	var gpx = route.gpx;
-	    	var color = route.color;
-	    	var name = '';
-	    	if (route.hasOwnProperty('name')) {
-				name = route.name;
-				console.log("Route is named " + name); 
-	   		}
-	    	this.plot_route(gpx, color, name);
+	    	    this.plot_route(options.routes[i]);
 		}
     }
 
-    /* Markers and traces are records of the position and trajectory information 
-     * we have already created for each spot ID.  Consider them like dicts (hash tables) 
-     * indexed by id.  The first time we get data on a rider, we create the marker and trace 
-     * for that rider. 
+
+    /* Markers and traces are records of the position and trajectory
+     * information we have already created for each spot ID.  Consider
+     * them like dicts (hash tables) indexed by id.  The first time we
+     * get data on a rider, we create the marker and trace for that
+     * rider.
      */
     var markers = { };
     var traces = { };
 
-    /* We will always call the same URL to ask for updates on all the riders, so we'll calculate the 
+    /* We will always call the same URL to ask for updates 
+     * on all the riders, so we'll calculate the 
      * spot request URL just once. 
      */
     var spot_query_url="_riders";
@@ -144,8 +208,10 @@ function Enroute(options) {
 
     /* 
      * Expected format of spot observations is 
-     * [ { id: spot_id,  latest: { spot observation data }, path: [ points in last hour ] }, 
-     *   { id:  spot_id,  latest: { spot observation data }, path: [ points in last hour ] }, 
+     * [ { id: spot_id,  latest: { spot observation data }, 
+     *     path: [ points in last hour ] }, 
+     *   { id:  spot_id,  latest: { spot observation data }, 
+     *     path: [ points in last hour ] }, 
      *    ... ]
      */
 
@@ -170,7 +236,8 @@ function Enroute(options) {
 
     function show_track(obs) {
 	/* Expecting obs to be 
-         * { id:  spot_id,  latest: { spot observation data }, path: [ points in last hour ] }
+         * { id:  spot_id,  latest: { spot observation data },
+         *   path: [ points in last hour ] }
          */
 	show_position(obs.id, obs.latest);
 	show_path(obs.id, obs.path);
@@ -208,7 +275,6 @@ function Enroute(options) {
             rider.marker = marker;
         }
     }
-
 
     function show_path(id, path) {
 	console.log("Plotting trace " + path);

@@ -94,10 +94,9 @@ def get_route():
     """
     app.logger.debug("Ajax request for route ")
     route = flask.request.args.get("route", type=str)
-    route_filename = route + ".json"
     app.logger.debug("Attempting send from static/routes/{}"
-                         .format(route_filename))
-    return flask.send_from_directory('static/routes', route_filename)
+                         .format(route))
+    return flask.send_from_directory('static/routes', route)
 
 @app.route('/_riders', methods=['GET'])
 def get_riders():
