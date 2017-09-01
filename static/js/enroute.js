@@ -7,20 +7,43 @@ Enroute.js
      Michal Young, 2014-2017.
      This version August 2017. 
 
-Example usage: 
+Example usage (expand lists with more items): 
 
 var options = {
     center:  [44.709248,-122.8550084],
     zoom: 8,
-    routes:  [{ name: "Dari Dart", 
-                points: "DariDart.json", 
-                distances: "DariDartUTM.json"}]
-    spot_feeds: [{ name: "Michal Young",
+    spot_feeds: [
+       { name: "Michal Young",
         feed: "0GiLP5jn9iVj8z8qm90QaTnkpygdAmouk", 
-        color: "#0066ff"
-       }]
- }; 
+        color: "#0066ff", 
+	distances: "DariDartUTM.json"
+       }], 
+    routes:  [{ points: "DariDart.json",
+               distances: "DariDartUTM.json",
+               color:  "#196666",
+               name: "Dari Dart" }   ],
+    utm_file: "DariDartUTM.json"
+}; 
 var tracking = new Enroute(options);
+
+We keep two copies of the 'spot_feeds' data.  One is a simple 
+array of the SPOT ids, which we loop through for queries. The 
+other is a dictionary with SPOT id as key.  The records in the 
+dictionary are augmented with observation and trace data, e.g., 
+
+feeds = [ "0GiLP5jn9iVj8z8qm90QaTnkpygdAmouk", ... ]
+
+riders = {
+   "0GiLP5jn9iVj8z8qm90QaTnkpygdAmouk": 
+       { name: "Michal Young",
+        feed: "0GiLP5jn9iVj8z8qm90QaTnkpygdAmouk", 
+        color: "#0066ff", 
+        marker: <Leaflet marker object>, // added in show_position, 
+	trace: <Leaflet polyline object>, // added in show_path, 
+	distances: "DariDartUTM.json"     // may be taken from overall options
+       }, 
+   ...
+}
 
 */
 
@@ -35,6 +58,9 @@ console.log("Constructor of August 2017");
 function Enroute(options) {
 
     console.log("This is version of August 2017")
+
+    var riders = { };
+    var feeds = [ ];
 
     /* 
      * Fields in this object: 
@@ -63,8 +89,6 @@ function Enroute(options) {
 		this.zoom = 5;
     }
 
-    var riders = { };
-    var feeds = [ ]
     if ('spot_feeds' in options) {
 	for (var i=0; i < options.spot_feeds.length; ++i) {
 	    var rider = options.spot_feeds[i];
@@ -183,16 +207,6 @@ function Enroute(options) {
 		}
     }
 
-
-    /* Markers and traces are records of the position and trajectory
-     * information we have already created for each spot ID.  Consider
-     * them like dicts (hash tables) indexed by id.  The first time we
-     * get data on a rider, we create the marker and trace for that
-     * rider.
-     */
-    var markers = { };
-    var traces = { };
-
     /* We will always call the same URL to ask for updates 
      * on all the riders, so we'll calculate the 
      * spot request URL just once. 
@@ -225,7 +239,8 @@ function Enroute(options) {
 		  console.log("Received spot data: " + observations + " length "
 			      + observations.length);
 		  for (var i=0; i < observations.length; ++i) {
-		      console.log("Observation #" + i + " of " + observations.length); 
+		      console.log("Observation #" + i + " of " +
+				  observations.length); 
 		      var obs = observations[i];
 		      console.log("Received observation of tracker " + obs.id);
 		      show_track(obs);
@@ -239,42 +254,101 @@ function Enroute(options) {
          * { id:  spot_id,  latest: { spot observation data },
          *   path: [ points in last hour ] }
          */
+	console.log("Show track: latest=" + JSON.stringify(obs.latest)); 
 	show_position(obs.id, obs.latest);
 	show_path(obs.id, obs.path);
     }
 
-    function show_position( id, observation ) {
-	console.log("Handling observation: " + observation);
-        var position = observation.latlon; 
-	var rider = riders[id]; 
-        var name = rider.name;
-        var obs_time = moment(observation.dateTime);
+    function ensure_marker( rider, position ) {
+	if (rider.hasOwnProperty("marker")) {
+	    return;
+	}
+	console.log("Creating a new marker for " + rider.name +
+		    " at " + position); 
+        var color = rider.color;
+        var bicon = L.MakiMarkers.icon({icon: "bicycle",
+					color: color, size: "m"});
+        var marker = L.marker(position,
+			      {
+				  title: name,
+				  icon: bicon, 
+				  riseOnHover: true, 
+			      }).addTo(map);
+	rider.marker = marker; 
+	return marker;
+    }
+
+    /* Given an ISO time string, return a humanized description */ 
+    function time_desc(time) {
+	console.log("Humanizing time string " + time);
+	obs_time = moment(time); 
         var ago = obs_time.fromNow(); 
         var obs_time_str = obs_time.format("hh:mm a<br />ddd MMM D")
             + "<br />(" + ago + ")";
-	console.log("Observation is for " + name + " at " + obs_time_str);
-        if (rider.hasOwnProperty("marker")) {
-            console.log("Updating existing marker");
-            var marker = rider.marker;
-            marker.setLatLng(position);
-            marker.bindPopup("<b>" + name + "</b><br />" + obs_time_str );
-        } else {
-	    console.log("Creating a new marker for " + name);
-            // Initial marker structure
-            var color = rider.color;
-            var bicon = L.MakiMarkers.icon({icon: "bicycle",
-					    color: color, size: "m"});
-            var marker = L.marker(position,
-				  {
-				      title: name,
-				      icon: bicon, 
-				      riseOnHover: true, 
-				  }).addTo(map);
-	    
-            marker.bindPopup("<b>" + name  + "</b> <br />" + obs_time_str);
-            rider.marker = marker;
-        }
+	return obs_time_str;
     }
+
+    /* Given kilometers measure in full precision, 
+     * return formatted description of rounded km and miles; 
+     * kilometers == -1 is special case signaling "off course"
+     */
+    function dist_desc(dist_km) {
+	if (dist_km < 0) {
+	    return "off course"
+	}
+	var km_rounded = Math.round(dist_km);
+	var mi_rounded = Math.round(dist_km * 0.6213);
+	var desc = options.name + "\n" +
+	    dist_km + "km (" +
+	    dist_mi + "mi)";
+	return desc;
+    }
+
+    /* Describe progress including distance along path */ 
+    function describe_progress_d(rider,  latlng, distances, time) {
+	console.log("describe_progress_d for rider " + rider.name); 
+	ensure_marker(rider); 
+	var marker = rider.marker; 
+	$.getJSON("/_along", 
+		  { lat: latlng.lat,
+		    lng: latlng.lng,
+		    track: distances },
+		  function (d) {
+		      var desc = "<p>" + rider.name + "<br /"> + 
+			  time_desc(time) + "<br />" +
+			  dist_desc(d) + "</p>";
+		      console.log("Binding description " + desc); 
+		      marker.bindPopup(desc);
+		  });
+    }
+	
+    /* Describe progress as time alone, without distance */
+    function describe_progress_t(rider,  latlng, time) {
+	console.log("describe_progress_t for" + rider.name);
+	ensure_marker(rider); 
+	var marker = rider.marker;
+	var when_desc = time_desc(time);
+	console.log("Time description: " + when_desc);
+	var desc = "<p>" + rider.name + "<br />" +  when_desc + "</p>" ;
+	console.log("Popup description: " + desc); 
+	marker.bindPopup(desc);
+    }
+	    
+    function show_position( id, observation ) {
+	console.log("Handling observation: " + JSON.stringify(observation));
+        var position = observation.latlon; 
+	var rider = riders[id];
+	var time = observation.dateTime; 
+	ensure_marker(rider, position); 
+	var marker = rider.marker;
+	marker.setLatLng(position);
+	if (rider.hasOwnProperty("distances")) {
+	    describe_progress_d( rider, position, rider.distances, time );
+	} else {
+	    describe_progress_t( rider, position, time );
+	}
+    }
+
 
     function show_path(id, path) {
 	console.log("Plotting trace " + path);
