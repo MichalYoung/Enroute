@@ -57,6 +57,11 @@ def _checkin():
 def along():
     return flask.render_template('along.html')
 
+
+######
+# Ajax handlers
+######
+
 @app.route('/_along')
 def _along():
     """AJAX responder to request for distance along path"""
@@ -70,8 +75,12 @@ def _along():
                                      track_file)
         with open(file_path) as f:
             track_obj = json.load(f)
+            assert type(track_obj) == dict, "Distances file must be dict"
+            assert "path" in track_obj and "zone" in track_obj, \
+                 "Distances file must be object with UTM path and zone"
             dist = measure.interpolate_route_distance(lat, lon,
                         track_obj["path"], track_obj["zone"])
+            app.logger.debug("Interpolated distance {:4,f}".format(dist))
             return flask.jsonify(result=dist)
     except FileNotFoundError as e: 
         app.logger.warn("File {} not found".format(track_file))
@@ -81,11 +90,6 @@ def _along():
         raise
         # return flask.jsonify(result=0)
         
-
-
-######
-# Ajax handlers
-######
 
 @app.route('/_get_route', methods=['GET'])
 def get_route():
