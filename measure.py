@@ -224,7 +224,7 @@ def interpolate_route_distance(lat, lon, utm_track, utm_zone):
     if min_deviance > max_dev_sqr:
         log.debug("Nothing within buffer distance; closest was {}km"
                       .format(math.sqrt(min_deviance)))
-        return 0
+        return -1.0
     return inter_dist
 
 def into_range(val, lim_1, lim_2):
