@@ -298,25 +298,30 @@ function Enroute(options) {
 	}
 	var km_rounded = Math.round(dist_km);
 	var mi_rounded = Math.round(dist_km * 0.6213);
-	var desc = options.name + "\n" +
-	    dist_km + "km (" +
-	    dist_mi + "mi)";
+	var desc = `${km_rounded}km (${mi_rounded}mi)`;
 	return desc;
     }
 
     /* Describe progress including distance along path */ 
-    function describe_progress_d(rider,  latlng, distances, time) {
+    function describe_progress_d(rider,  pos, distances, time) {
 	console.log("describe_progress_d for rider " + rider.name); 
 	ensure_marker(rider); 
-	var marker = rider.marker; 
+	var marker = rider.marker;
+	/* pos is NOT a latlng object; it's a list of two elements */
+	var lat = pos[0];
+	var lng = pos[1]; 
+	console.log("Querying for lat and lng " +
+		    lat + ", " + lng)
+	console.log("  ... using distances file  " + distances);
 	$.getJSON("/_along", 
-		  { lat: latlng.lat,
-		    lng: latlng.lng,
+		  { lat: lat,
+		    lng: lng,
 		    track: distances },
 		  function (d) {
-		      var desc = "<p>" + rider.name + "<br /"> + 
+		      var dist_km = d.result;
+		      var desc = "<p>" + rider.name + "<br />" + 
 			  time_desc(time) + "<br />" +
-			  dist_desc(d) + "</p>";
+			  dist_desc(dist_km) + "</p>";
 		      console.log("Binding description " + desc); 
 		      marker.bindPopup(desc);
 		  });
