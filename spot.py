@@ -32,6 +32,10 @@ client = MongoClient(MONGO_URL)
 db = client.enroute
 collection = db.tracks
 
+class BadSpotFeed(Exception):
+    """That Spot GID didn't work"""
+    pass
+
 def is_stale(a):
     """a is an arrow object.  It is stale if it is more than 
     QUERY_INTERVAL_MINUTES in the past. 
@@ -102,7 +106,18 @@ def spot_direct_query(feed):
     return { "id": feed, "last_query_time": arrow.now().isoformat(),
                  "latest": last_obs, "path": path }
 
-
+def spot_gid_valid(feed_id):
+    """
+    Returns a boolean (true if Spot query successful) 
+    and an error message (empty if Spot query successful)
+    """
+    try:
+        messages = spot_feed(feed_id)
+        return True, ""
+    except BadSpotFeed as e:
+        err_message = "{}".format(e)
+        return False, err_message
+        
 def spot_feed(feed_id,empty_exception=False):
     """
     Retrieve the last 50 messages from feed.
@@ -121,11 +136,11 @@ def spot_feed(feed_id,empty_exception=False):
     txt = response.read().decode("utf-8")
     data=json.loads(txt)
     if "errors" in data["response"]:
-        if empty_exception:
-            msg = data["response"]["errors"]["error"]["description"]
-            raise Exception(msg)
-        else:
+        msg = data["response"]["errors"]["error"]["description"]
+        if "No displayable messages" in msg and not empty_exception:
             return [ ]
+        else: 
+            raise BadSpotFeed(msg)
 
     points = data["response"]["feedMessageResponse"]["messages"]["message"]
     if isinstance(points,list):

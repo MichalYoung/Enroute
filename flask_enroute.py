@@ -30,22 +30,72 @@ app.logger.setLevel(logging.DEBUG)  # FIXME: from config file
 ###
 
 @app.route("/")
+def root():
+    return flask.redirect(flask.url_for("index"))
+
 @app.route("/index")
 def index():
   app.logger.debug("Main page entry")
-  return flask.render_template("eclipse.html")
+  app.logger.debug("Note url_for('root') is {}"
+                     .format(flask.url_for("root")))
+  return flask.render_template("index.html")
 
-# FIXME: We should pick out a particular event based
-# on URL.  It should be a variable and read from
-# config file or database
-@app.route('/eclipse')
-def eclipse():
-    return flask.render_template("eclipse.html")
+
 
 ### Experimental: Phone checkin
 @app.route('/checkin')
 def checkin():
     return flask.render_template("checkin.html")
+
+
+@app.route('/along_demo')
+def demo():
+    return flask.render_template('tracker.html')
+
+@app.route('/along/<route>')
+def along(route):
+    # Error checking: Does this route name match files in
+    # the static/routes directory? We expect to see
+    # routename_points.json and routename_dists.json.
+    #
+    app.logger.debug("Entering along(route) with argument {}".format(route))
+    flask.g.routename=route
+    points_file_name = os.path.join("static", "routes",
+                                        route + "_points.json")
+    dists_file_name = os.path.join("static", "routes",
+                                       route + "_dists.json")
+    if not os.path.isfile(points_file_name):
+        app.logger.warn("No such points file '{}'".format(points_file_name))
+        flask.g.missing=points_file_name
+        return flask.render_template("missing_file.html")
+    if not os.path.isfile(dists_file_name):
+        app.logger.warn("No such distances file '{}'".format(dists_file_name))
+        flask.g.missing=dists_file_name
+        return flask.render_template("missing_file.html")
+    return flask.render_template('along.html')
+
+######
+#  Form handlers (not Ajax)
+#####
+
+@app.route('/_trackme')
+def initiate_tracker():
+    route = flask.request.args.get("route", type=str)
+    spot_url =  flask.request.args.get("spot_url", type=str)
+    if spot_url != "": 
+        spot_fields = spot_url.split("=")
+        gid = spot_fields[-1]
+        app.logger.debug("Checking spot feed {}".format(gid))
+        spot_ok, msg = spot.spot_gid_valid(gid)
+        if not spot_ok:
+            flask.flash("Spot checker URL problem: {}".format(msg))
+            return flask.redirect(flask.url_for("index"))
+    return flask.redirect(flask.url_for("along",route=route))
+
+
+######
+# Ajax handlers
+######
 
 @app.route('/_checkin', methods=["POST"])
 def _checkin():
@@ -53,14 +103,6 @@ def _checkin():
     app.logger.debug("Received _checkin")
     return json.dumps( { "reply": "Got it" } )
 
-@app.route('/along_demo')
-def along():
-    return flask.render_template('along.html')
-
-
-######
-# Ajax handlers
-######
 
 @app.route('/_along')
 def _along():

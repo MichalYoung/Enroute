@@ -77,6 +77,11 @@ function Enroute(options) {
      *   this.feeds :  [ "Spot feed id", "Spot feed id", ... ]
      *   this.map : Leaflet map object
      */
+
+    var app_root = "/";
+    if ('app_root' in options) {
+	app_root = options.app_root;
+    }
     
     if ('center' in options) {
 		this.center = options.center;
@@ -158,7 +163,7 @@ function Enroute(options) {
 		    + latlng + " on " + options.name);
 	if (options.hasOwnProperty("distances")) {
 	    console.log("has distances");
-	    $.getJSON("/_along", 
+	    $.getJSON(app_root + "_along", 
 		      { lat: latlng.lat,
 			lng: latlng.lng,
 			track: options.distances },
@@ -185,7 +190,7 @@ function Enroute(options) {
 
     function plot_route( options ) {
 	var points_file = options.points;
-	$.get("_get_route?route=" + points_file,
+	$.get(app_root + "_get_route?route=" + points_file,
               function(points) {
 		  var route = L.polyline(points,
 		      { color: options.color, weight: 6, opacity: 0.5} );
@@ -193,7 +198,13 @@ function Enroute(options) {
 		      console.log('mouseover');
 		      route_point_describe(e.latlng, options);
 		  });
-		  route.addTo(map); 
+		  route.addTo(map);
+		  if (options.zoomto) {
+		      console.log("Zooming map to route"); 
+		      map.fitBounds(route.getBounds());
+		  } else {
+		      console.log("Not centering map");
+		  }
 	      });
 	console.log("Created route " + options.name);
     }
@@ -211,7 +222,7 @@ function Enroute(options) {
      * on all the riders, so we'll calculate the 
      * spot request URL just once. 
      */
-    var spot_query_url="_riders";
+    var spot_query_url= app_root + "_riders";
     var parm_marker = "?feed=";
     for (var i=0; i < feeds.length; ++i) {
 	spot_query_url = spot_query_url + parm_marker + feeds[i];
@@ -313,7 +324,7 @@ function Enroute(options) {
 	console.log("Querying for lat and lng " +
 		    lat + ", " + lng)
 	console.log("  ... using distances file  " + distances);
-	$.getJSON("/_along", 
+	$.getJSON(app_root + "_along", 
 		  { lat: lat,
 		    lng: lng,
 		    track: distances },
