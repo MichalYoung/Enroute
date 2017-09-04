@@ -22,7 +22,7 @@ log = logging.getLogger(__name__)
 # Upper bound on distance from mapped route for us
 # to calculate a "distance along route"
 #
-MAX_DEVIANCE_METERS = 3000        # 3km
+MAX_DEVIANCE_METERS = 2000        # 2km
 
 # --------------------------------------
 
@@ -162,14 +162,19 @@ def track_to_utm(track):
 
     return utm_path, utm_zone
 
-def interpolate_route_distance(lat, lon, utm_track, utm_zone):
+def interpolate_route_distance(lat, lon, utm_track, utm_zone, prior_obs=None):
     """
     If (lat, lon) is within MAX_DEVIANCE_METERS of 
     a segment on utm_track, calculate distance 
     to nearest point. 
+
+    If prior is given, it should be a (lat, lon) pair.  In that case, 
+    distance returned will be to a track segment within 180 degrees 
+    of the same direction (i.e., more "the same way" than "the other way"). 
     """
     if len(utm_track) == 0:
         return 0
+
     skipped_point_count = 0
     measured_point_count = 0
     new_min_count = 0
@@ -177,6 +182,17 @@ def interpolate_route_distance(lat, lon, utm_track, utm_zone):
     max_dev_sqr = MAX_DEVIANCE_METERS * MAX_DEVIANCE_METERS
     obs_east, obs_north, _, _ = \
          utm.from_latlon(lat, lon, force_zone_number=utm_zone)
+
+    # If we have a prior point, we want to filter by direction
+    if prior_obs:
+        prior_lat, prior_lon = prior_obs
+        prior_east, prior_north, _, _ = \
+          utm.from_latlon(prior_lat, prior_lon, force_zone_number=utm_zone)
+        travel_east = obs_east - prior_east
+        travel_north = obs_north - prior_north
+    else:
+        travel_east, travel_north = 0, 0
+
     min_deviance = 2 * max_dev_sqr
     interpolated_dist = 0
     prior = utm_track[0]
@@ -186,12 +202,27 @@ def interpolate_route_distance(lat, lon, utm_track, utm_zone):
         east_1, north_1, dist_km_1 = prev
         east_2, north_2, dist_km_2 = pt
         # log.debug("Segment ending at distance {:2,.2f}km".format(dist_km_2))
+
+        # First cheap filter:  Not in buffered bounding box of
+        # track segment
         if (obs_east + buffer < min(east_1, east_2)
             or obs_east - buffer > max(east_1, east_2)
             or obs_north + buffer < min(north_1, north_2)
             or obs_north - buffer > max(north_1, north_2)):
             skipped_point_count += 1
             continue
+
+        # Second filter: Don't consider track segments running
+        # a contrary direction, as indicated by negative dot product.
+        # Note 0,0 will result in accepting a point
+        if prior_obs: 
+            dot_product = travel_east * (east_2 - east_1) \
+                        + travel_north * (north_2 - north_1)
+            # Negative dot product means "in the contrary direction"
+            if dot_product < 0.0 :
+                log.debug("Filtering wrong-way segment")
+                skipped_point_count += 1
+                continue
 
         measured_point_count += 1
         log.debug("Observation {:2,.2f},{:2,.2f}".format(obs_east, obs_north))

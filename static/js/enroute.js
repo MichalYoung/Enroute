@@ -270,6 +270,9 @@ function Enroute(options) {
 	show_path(obs.id, obs.path);
     }
 
+    /* Create a marker if the rider doesn't already have one; 
+     * after ensure_marker it is safe to reference rider.marker.
+     */
     function ensure_marker( rider, position ) {
 	if (rider.hasOwnProperty("marker")) {
 	    return;
@@ -314,19 +317,31 @@ function Enroute(options) {
     }
 
     /* Describe progress including distance along path */ 
-    function describe_progress_d(rider,  pos, distances, time) {
+    function describe_progress_d(rider, observation, distances) {
 	console.log("describe_progress_d for rider " + rider.name); 
 	ensure_marker(rider); 
 	var marker = rider.marker;
+	var time = observation.dateTime; 
+        var pos = observation.latlon; 
 	/* pos is NOT a latlng object; it's a list of two elements */
 	var lat = pos[0];
 	var lng = pos[1]; 
+	if (observation.hasOwnProperty("prior_position")) {
+	    prior_lat = observation.prior_position[0]
+	    prior_lng = observation.prior_position[1]
+	} else {
+	    // Default values indicate we don't have a prior observation
+	    prior_lat = 0;
+	    prior_lon = 0;
+	}
 	console.log("Querying for lat and lng " +
 		    lat + ", " + lng)
 	console.log("  ... using distances file  " + distances);
 	$.getJSON(app_root + "_along", 
 		  { lat: lat,
 		    lng: lng,
+		    prior_lat: prior_lat,
+		    prior_lng: prior_lng, 
 		    track: distances },
 		  function (d) {
 		      var dist_km = d.result;
@@ -359,7 +374,7 @@ function Enroute(options) {
 	var marker = rider.marker;
 	marker.setLatLng(position);
 	if (rider.hasOwnProperty("distances")) {
-	    describe_progress_d( rider, position, rider.distances, time );
+	    describe_progress_d( rider, observation, rider.distances );
 	} else {
 	    describe_progress_t( rider, position, time );
 	}

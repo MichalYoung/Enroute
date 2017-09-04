@@ -1,6 +1,70 @@
 """
 The enroute functionality tied to spot trackers, 
 including caching in a MongoDB database. 
+
+A spot feed normall looks like this: 
+
+[ {'@clientUnixTime': '0', 
+    'id': 821374484, 
+    'messengerId': '0-2460348', 
+    'messengerName': "Michal's Spot", 
+    'unixTime': 1504235730, 
+    'messageType': 'TRACK', 
+    'latitude': 44.02339, 
+    'longitude': -123.13719, 
+    'modelId': 'SPOT3', 
+    'showCustomMsg': 'N', 
+    'dateTime': '2017-09-01T03:15:30+0000', 
+    'messageDetail': '', 
+    'batteryState': 'GOOD', 
+    'hidden': 0, 
+    'altitude': -103},
+   {'@clientUnixTime': '0', 
+     'id': 821371513, 
+      'messengerId': '0-2460348', 
+      'messengerName': "Michal's Spot", 
+      'unixTime': 1504235140, 
+      'messageType': 'OK', 
+      'latitude': 44.04497, 
+      'longitude': -123.07883, 
+      'modelId': 'SPOT3', 
+      'showCustomMsg': 'N', 
+      'dateTime': '2017-09-01T03:05:40+0000', 
+      'messageDetail': '', 
+      'batteryState': 'GOOD', 
+      'hidden': 0, 
+      'messageContent': 'Checking in --- OK!', 
+      'altitude': 0}, 
+  {'@clientUnixTime': '0', 
+    'id': 821371478, 
+    'messengerId': '0-2460348', 
+    'messengerName': "Michal's Spot", 
+    'unixTime': 1504235133, 
+    'messageType': 'TRACK', 
+    'latitude': 44.03919, 
+    'longitude': -123.13339, 
+    'modelId': 'SPOT3', 
+    'showCustomMsg': 'N', 
+    'dateTime': '2017-09-01T03:05:33+0000', 
+    'messageDetail': '', 
+    'batteryState': 'GOOD', 
+    'hidden': 0, 
+    'altitude': -103},
+ {'@clientUnixTime': '0', 
+    'id': 821368036, 
+    'messengerId': '0-2460348', 
+    'messengerName': "Michal's Spot", 
+    'unixTime': 1504234535, 
+    'messageType': 'TRACK', 
+    'latitude': 44.04246, 
+    'longitude': -123.11697, 
+    'modelId': 'SPOT3', 
+    'showCustomMsg': 'N', 
+    'dateTime': '2017-09-01T02:55:35+0000', 
+    'messageDetail': '', 
+    'batteryState': 'GOOD', 
+    'hidden': 0, 
+    'altitude': -103}]
 """
 
 import sys
@@ -69,7 +133,8 @@ def get_feeds(feedlist):
         last_queried = arrow.get(record["last_query_time"])
         # Note that a bogus "missing" record is always stale,
         # but here we'll update its last query time even if there
-        # are no records available from Spot. 
+        # are no records available from Spot. This is to ensure
+        # we poll it at the same rate as Spots with data, not faster. 
         if is_stale(last_queried): 
                 record = spot_direct_query(feed)
                 collection.update_one(  {"id": feed },
@@ -82,7 +147,9 @@ def get_feeds(feedlist):
     return feeds
 
 def spot_direct_query(feed):
-    """Returns record with fields id, last_query_time, last_observation, path """
+    """Returns record with fields id, last_query_time,
+    last_observation, path 
+    """
     time.sleep(2)
     messages = spot_feed(feed)
     log.debug("Spot observation: {}".format(messages))
@@ -95,7 +162,14 @@ def spot_direct_query(feed):
     last_obs = { "dateTime": last["dateTime"],
                  "latlon":   [ last["latitude"], last["longitude"] ],
                  "batteryState":  last["batteryState"] }
-
+    # Previous point observed is useful for determining
+    # direction of travel. We get this even if the user has
+    # been paused for longer than their track expiration.
+    # Messages are in backward chronological order (per example),
+    # so messages[1] is the penultimate position
+    if len(messages) > 1:
+        last_obs["prior_position"] = [ messages[1]["latitude"],
+                                       messages[1]["longitude"]]
     path = [ ]
     points_expire = arrow.now().replace(hours=-1)
     #points_expire = arrow.now().replace(days=-7)

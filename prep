@@ -1,0 +1,12 @@
+#! /bin/bash
+#
+# Usage: prep_route /path/to/gpx/file prefix
+#
+# Creates static/routes/prefix_{points,dists}.json
+#
+GPX=$1
+NAME=$2
+ls ${GPX}
+
+python3 gpx_simplify.py --delta 30 --points ${GPX} static/routes/${NAME}_points.json
+python3 measure.py static/routes/${NAME}_points.json static/routes/${NAME}_dists.json

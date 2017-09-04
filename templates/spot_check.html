@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head;
+        any other head content must come *after* these tags -->
+
+<style>
+  input:invalid {
+    border-color: #900;
+    background-color: #FDD;
+  }
+
+
+  input:focus:invalid {
+     outline: none;
+   }		      
+
+  input:valid {
+     border-color: rgb(0,200,0);
+  }
+</style>
+
+    <title>Experiment</title>
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet"
+       href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+       integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+       crossorigin="anonymous"> 
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+<div class="container">
+<h1>How is that SPOT URL?</h1>
+
+    <p>Let's just check out that SPOT URL ... </p>
+
+    <form id="SpotCheck">
+    <label for="spot_url">Spot public page URL:</label>
+    <input type="url" name="spot_url" id="spot_url">
+    <span id="badurlmsg"></span>
+    </form>
+    <p id="gid">(device GID)</p>
+    <p id="response">(response here)</p>
+
+
+
+
+</div> <!-- container -->
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+   <script
+    src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+    integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+    crossorigin="anonymous"></script>
+
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.17.0/jquery.validate.js"
+  crossorigin="anonymous">
+</script>
+
+    <script>
+
+    $("#SpotCheck").submit( function (e) { e.preventDefault(); });
+    
+    $('input[name="spot_url"]').change(
+    function() {
+      var page_url = $(this).val();
+      var gid = page_url.split("/").slice(-1)[0].split("=").slice(-1)[0];
+      $("#gid").html(`Device identifier:  ${gid}`);
+      if (gid.length == 0) {
+         // OK, tracking a Spot is optional
+	 this.setCustomValidity('');
+	 $('#badurlmsg').html("");	 
+      } else if (gid.length == 33) {
+	 $('#badurlmsg').html("");
+	 this.setCustomValidity('');
+	 console.log("Accepted spot URL");
+      } else {
+      	 $('#spot_url')[0].setCustomValidity(
+	    "This URL does not end with the 33-character Spot device ID");
+	 $('#badurlmsg').html(
+	   "<p>URL should look like this: " +
+	     "http://share.findmespot.com/shared/faces/viewspots.jsp?glId=0GiLP5jn9iVj8z8qm90QaMnkpyxdAmruk </p>")
+	 console.log("Rejected spot gid " + gid);
+	 console.log("Length was " + gid.length); 
+      }
+    });
+
+    
+    </script>
+
+
+</body>
+</html>

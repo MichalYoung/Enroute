@@ -52,14 +52,24 @@ def checkin():
 def demo():
     return flask.render_template('tracker.html')
 
-@app.route('/along/<route>')
-def along(route):
+@app.route('/along')
+def along():
+    app.logger.debug("Entering along(route)")
+    route = flask.request.args.get("route", None)
+    gid = flask.request.args.get("gid", None)
+    name = flask.request.args.get("name", "A Nonny Mouse")
+    app.logger.debug("Tracking route {}, spot {}".format(route,gid))
+
+    flask.g.gid = gid
+    flask.g.route = route
+    flask.g.name = name
+    
+    app.logger.debug("/along with gid='{}', route='{}'"
+                         .format(flask.g.gid, flask.g.route))
+    
     # Error checking: Does this route name match files in
     # the static/routes directory? We expect to see
     # routename_points.json and routename_dists.json.
-    #
-    app.logger.debug("Entering along(route) with argument {}".format(route))
-    flask.g.routename=route
     points_file_name = os.path.join("static", "routes",
                                         route + "_points.json")
     dists_file_name = os.path.join("static", "routes",
@@ -82,6 +92,7 @@ def along(route):
 def initiate_tracker():
     route = flask.request.args.get("route", type=str)
     spot_url =  flask.request.args.get("spot_url", type=str)
+    rider_name= flask.request.args.get("rider_name", type=str)
     if spot_url != "": 
         spot_fields = spot_url.split("=")
         gid = spot_fields[-1]
@@ -90,7 +101,9 @@ def initiate_tracker():
         if not spot_ok:
             flask.flash("Spot checker URL problem: {}".format(msg))
             return flask.redirect(flask.url_for("index"))
-    return flask.redirect(flask.url_for("along",route=route))
+    return flask.redirect(flask.url_for("along",route=route,
+                                            gid=gid,
+                                            name=rider_name))
 
 
 ######
@@ -111,6 +124,8 @@ def _along():
     try:
         lat = flask.request.args.get('lat', None, type=float)
         lon = flask.request.args.get('lng', None, type=float)
+        prior_lat = flask.request.args.get('prior_lat', None, type=float)
+        prior_lng = flask.request.args.get('prior_lng', None, type=float)
         app.logger.debug("lat, lon = {}, {}".format(lat, lon))
         track_file = flask.request.args.get('track', '', type=str)
         file_path = os.path.join("static", "routes",
@@ -120,7 +135,12 @@ def _along():
             assert type(track_obj) == dict, "Distances file must be dict"
             assert "path" in track_obj and "zone" in track_obj, \
                  "Distances file must be object with UTM path and zone"
-            dist = measure.interpolate_route_distance(lat, lon,
+            if prior_lat or prior_lng:
+                dist = measure.interpolate_route_distance(lat, lon,
+                                        track_obj["path"], track_obj["zone"],
+                                        (prior_lat, prior_lng))
+            else: 
+                dist = measure.interpolate_route_distance(lat, lon,
                         track_obj["path"], track_obj["zone"])
             app.logger.debug("Interpolated distance {:4,f}".format(dist))
             return flask.jsonify(result=dist)

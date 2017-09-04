@@ -11,7 +11,12 @@ import sys
 import argparse
 import gpxpy
 import gpxpy.gpx
-import json 
+import json
+
+import logging
+logging.basicConfig(format='%(levelname)s:%(message)s',
+                        level=logging.DEBUG)
+log = logging.getLogger(__name__)
 
 delta = 100
 
@@ -48,7 +53,9 @@ def main():
     args = getargs()
     gpx = gpxpy.parse(args.infile)
     delta = args.delta
+    log.debug("{} points before simplification".format(len(points(gpx))))
     gpx.simplify(delta)
+    log.debug("{} points after simplification".format(len(points(gpx))))
     if args.format == "points": 
         print(json.dumps(points(gpx)), file=args.outfile)
     else: 
