@@ -5,7 +5,7 @@ Enroute.js
      Tracking randonneurs with Spot satellite trackers. 
      
      Michal Young, 2014-2017.
-     This version August 2017. 
+     This version September 2017. 
 
 Example usage (expand lists with more items): 
 
@@ -25,6 +25,11 @@ var options = {
     utm_file: "DariDartUTM.json"
 }; 
 var tracking = new Enroute(options);
+
+Adding September 2017:  Route points may be added programmatically 
+outside the "options" structure.  This is to allow for literal points
+file to be injected into the HTML, reducing the number of round trips
+to the server. 
 
 We keep two copies of the 'spot_feeds' data.  One is a simple 
 array of the SPOT ids, which we loop through for queries. The 

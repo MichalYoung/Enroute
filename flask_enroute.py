@@ -48,10 +48,6 @@ def checkin():
     return flask.render_template("checkin.html")
 
 
-@app.route('/along_demo')
-def demo():
-    return flask.render_template('tracker.html')
-
 @app.route('/along')
 def along():
     app.logger.debug("Entering along(route)")
@@ -84,6 +80,44 @@ def along():
         return flask.render_template("missing_file.html")
     return flask.render_template('along.html')
 
+@app.route('/utm_test')
+def utm_test():
+    app.logger.debug("Entering along(route)")
+    route = flask.request.args.get("route", None)
+    gid = flask.request.args.get("gid", None)
+    name = flask.request.args.get("name", "A Nonny Mouse")
+    app.logger.debug("Tracking route {}, spot {}".format(route,gid))
+
+    flask.g.gid = gid
+    flask.g.route = route
+    flask.g.name = name
+    
+    app.logger.debug("/along with gid='{}', route='{}'"
+                         .format(flask.g.gid, flask.g.route))
+    
+    # Error checking: Does this route name match files in
+    # the static/routes directory? We expect to see
+    # routename_points.json and routename_dists.json.
+    points_file_name = os.path.join("static", "routes",
+                                        route + "_points.json")
+    if not os.path.isfile(points_file_name):
+        app.logger.warn("No such points file '{}'".format(points_file_name))
+        flask.g.missing=points_file_name
+        return flask.render_template("missing_file.html")
+    flask.g.route_points = json.dumps(load_points(points_file_name))
+
+    dists_file_name = os.path.join("static", "routes",
+                                       route + "_dists.json")
+    if not os.path.isfile(dists_file_name):
+        app.logger.warn("No such distances file '{}'".format(dists_file_name))
+        flask.g.missing=dists_file_name
+        return flask.render_template("missing_file.html")
+    flask.g.route_distances = load_distances(dists_file_name);
+
+    return flask.render_template('tracker_w_utm.html')
+    
+
+
 ######
 #  Form handlers (not Ajax)
 #####
@@ -102,8 +136,11 @@ def initiate_tracker():
             flask.flash("Spot checker URL problem: {}".format(msg))
             return flask.redirect(flask.url_for("index"))
     return flask.redirect(flask.url_for("along",route=route,
-                                            gid=gid,
-                                            name=rider_name))
+                                             gid=gid,
+                                             name=rider_name))
+    # return flask.redirect(flask.url_for("utm_test",route=route,
+    #                                         gid=gid,
+    #                                         name=rider_name))
 
 
 ######
@@ -183,6 +220,40 @@ def get_riders():
 # Functions used by routes
 #
 ##################
+
+def load_points(file_path):
+    """Track points as an object that we can plug 
+    right into the web page. 
+    """
+    try: 
+        with open(file_path) as f:
+            points_obj = json.load(f)
+            assert type(points_obj) == list, "Expecting an array of points"
+            return points_obj
+            
+    except FileNotFoundError as e: 
+        app.logger.warn("File {} not found".format(file_path))
+        raise
+    except Exception as e:
+        app.logger.warn("load_points is broken... {}".format(e))
+        raise
+
+def load_distances(file_path): 
+    """UTM paths with distances"""
+    try: 
+        with open(file_path) as f:
+            track_obj = json.load(f)
+            assert type(track_obj) == dict, "Distances file must be dict"
+            assert "path" in track_obj and "zone" in track_obj, \
+                 "Distances file must be object with UTM path and zone"
+            return track_obj
+    except FileNotFoundError as e: 
+        app.logger.warn("File {} not found".format(track_file))
+        return flask.jsonify(result=0)
+    except Exception as e:
+        app.logger.warn("_along is broken... {}".format(e))
+        raise
+        # return flask.jsonify(result=0)
 
 
 

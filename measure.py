@@ -156,7 +156,9 @@ def track_to_utm(track):
           utm.from_latlon(lat, lon, force_zone_number=utm_zone)
         seg_dist_km = dist_km(prev, pt)
         tot_km += seg_dist_km
-        utm_pt = (easting, northing, tot_km)
+        # Compact rep in text: Round meters for easting and northing,
+        # two digits for kilometer distance
+        utm_pt = (round(easting), round(northing), round(tot_km, 2))
         utm_path.append(utm_pt)
         prev = pt
 
