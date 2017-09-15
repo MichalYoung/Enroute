@@ -31,7 +31,7 @@ app.logger.setLevel(logging.DEBUG)  # FIXME: from config file
 
 @app.route("/")
 def root():
-    return flask.redirect(flask.url_for("index"))
+    return flask.redirect(flask.url_for("crowsnest"))
 
 @app.route("/index")
 def index():
@@ -47,6 +47,11 @@ def index():
 def checkin():
     return flask.render_template("checkin.html")
 
+# Temporary -- special for Crows Nest 1000
+@app.route('/crowsnest')
+def crowsnest():
+    app.logger.debug("Crows Nest 1000")
+    return flask.render_template('crowsnest.html')
 
 @app.route('/along')
 def along():

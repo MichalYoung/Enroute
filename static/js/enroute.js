@@ -199,8 +199,8 @@ function Enroute(options) {
               function(points) {
 		  var route = L.polyline(points,
 		      { color: options.color, weight: 6, opacity: 0.5} );
-		  route.on('mouseover', function(e) {
-		      console.log('mouseover');
+		  route.on('click', function(e) {
+		      console.log('click');
 		      route_point_describe(e.latlng, options);
 		  });
 		  route.addTo(map);

@@ -4,9 +4,19 @@
 #
 # Creates static/routes/prefix_{points,dists}.json
 #
+USAGE="$1 /path/to/gpx prefix_for_files"
 GPX=$1
 NAME=$2
 ls ${GPX}
+
+if [ "${GPX}" == "" ] || [ "${NAME}" == "" ] ; then
+    echo "*** Usage: ${USAGE}"
+    exit 1
+fi
+if  [ ! -e ${GPX} ] ; then
+    echo "Didn't find file ${GPX}"
+    exit 1
+fi
 
 python3 gpx_simplify.py --delta 30 --points ${GPX} static/routes/${NAME}_points.json
 python3 measure.py static/routes/${NAME}_points.json static/routes/${NAME}_dists.json
