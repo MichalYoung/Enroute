@@ -285,6 +285,7 @@ function Enroute(options) {
 	console.log("Creating a new marker for " + rider.name +
 		    " at " + position); 
         var color = rider.color;
+	var name = rider.name; 
         var bicon = L.MakiMarkers.icon({icon: "bicycle",
 					color: color, size: "m"});
         var marker = L.marker(position,
