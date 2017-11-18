@@ -47,16 +47,11 @@ def index():
 def checkin():
     return flask.render_template("checkin.html")
 
-# Temporary -- special for Crows Nest 1000
-@app.route('/crowsnest')
-def crowsnest():
-    app.logger.debug("Crows Nest 1000")
-    return flask.render_template('crowsnest.html')
+@app.route('/eugbvt')
+def eugbvt():
+    app.logger.debug("Eugene to Beaverton")
+    return flask.render_template('EugBvt.html')
 
-@app.route('/lobster')
-def lobster():
-    app.logger.debug("Lobster Valley")
-    return flask.render_template('lobster.html')
 
 @app.route('/along')
 def along():
