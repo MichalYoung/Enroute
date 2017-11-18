@@ -50,7 +50,7 @@ def checkin():
 @app.route('/eugbvt')
 def eugbvt():
     app.logger.debug("Eugene to Beaverton")
-    return flask.render_template('EugBvt.html')
+    return flask.render_template('eugbvt.html')
 
 
 @app.route('/along')
