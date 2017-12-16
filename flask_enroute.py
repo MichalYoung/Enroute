@@ -117,42 +117,10 @@ def dartpop():
     return flask.render_template('along.html')
 
 
-@app.route('/utm_test')
-def utm_test():
-    app.logger.debug("Entering along(route)")
-    route = flask.request.args.get("route", None)
-    gid = flask.request.args.get("gid", None)
-    name = flask.request.args.get("name", "A Nonny Mouse")
-    app.logger.debug("Tracking route {}, spot {}".format(route,gid))
+@app.route('/def_ride')
+def def_ride():
+    return flask.render_template('define_ride.html')
 
-    flask.g.gid = gid
-    flask.g.route = route
-    flask.g.name = name
-    
-    app.logger.debug("/along with gid='{}', route='{}'"
-                         .format(flask.g.gid, flask.g.route))
-    
-    # Error checking: Does this route name match files in
-    # the static/routes directory? We expect to see
-    # routename_points.json and routename_dists.json.
-    points_file_name = os.path.join("static", "routes",
-                                        route + "_points.json")
-    if not os.path.isfile(points_file_name):
-        app.logger.warn("No such points file '{}'".format(points_file_name))
-        flask.g.missing=points_file_name
-        return flask.render_template("missing_file.html")
-    flask.g.route_points = json.dumps(load_points(points_file_name))
-
-    dists_file_name = os.path.join("static", "routes",
-                                       route + "_dists.json")
-    if not os.path.isfile(dists_file_name):
-        app.logger.warn("No such distances file '{}'".format(dists_file_name))
-        flask.g.missing=dists_file_name
-        return flask.render_template("missing_file.html")
-    flask.g.route_distances = load_distances(dists_file_name);
-
-    return flask.render_template('tracker_w_utm.html')
-    
 
 
 ######
@@ -251,6 +219,19 @@ def get_riders():
     app.logger.debug("Sending tracks: |{}|".format(tracks))
     return json.dumps(tracks)
 
+####
+# Ajax for database lookups
+####
+
+# @app.route('/_check_route', methods=['GET'])
+# def check_route():
+#     """
+#     Check database for a route matching a key. Returns a 
+#     name if it exists.  Indictates validity with a flag. 
+#     """
+#     app.logger.debug("Checking for route in database")
+#     return 
+
  
 ##################
 #
@@ -318,7 +299,6 @@ def page_not_found(error):
     app.logger.debug("500: Internal error")
     flask.session['linkback'] =  flask.url_for("index")
     return flask.render_template('500.html'), 500
-
 
 
 #################
