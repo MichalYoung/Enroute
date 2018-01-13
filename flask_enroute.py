@@ -52,6 +52,11 @@ def eugbvt():
     app.logger.debug("Eugene to Beaverton")
     return flask.render_template('eugbvt.html')
 
+@app.route('/alsea')
+def alsea():
+    app.logger.debug("Alsea")
+    return flask.render_template('alsea.html')
+
 
 @app.route('/along')
 def along():
@@ -85,36 +90,6 @@ def along():
         return flask.render_template("missing_file.html")
     return flask.render_template('along.html')
 
-@app.route('/dartpop')
-def dartpop():
-    app.logger.debug("Entering dartpop(route)")
-    route="dartpop"
-    gid="0VMqdoAtvZtPTNMNZJVZa5jhHdej3zLqM"
-    name = "Lynne's Dart Pop Team"
-
-    flask.g.gid = gid
-    flask.g.route = route
-    flask.g.name = name
-    
-    app.logger.debug("/dartpop with gid='{}', route='{}'"
-                         .format(flask.g.gid, flask.g.route))
-    
-    # Error checking: Does this route name match files in
-    # the static/routes directory? We expect to see
-    # routename_points.json and routename_dists.json.
-    points_file_name = os.path.join("static", "routes",
-                                        route + "_points.json")
-    dists_file_name = os.path.join("static", "routes",
-                                       route + "_dists.json")
-    if not os.path.isfile(points_file_name):
-        app.logger.warn("No such points file '{}'".format(points_file_name))
-        flask.g.missing=points_file_name
-        return flask.render_template("missing_file.html")
-    if not os.path.isfile(dists_file_name):
-        app.logger.warn("No such distances file '{}'".format(dists_file_name))
-        flask.g.missing=dists_file_name
-        return flask.render_template("missing_file.html")
-    return flask.render_template('along.html')
 
 
 @app.route('/def_ride')
