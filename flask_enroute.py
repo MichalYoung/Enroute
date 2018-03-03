@@ -47,10 +47,10 @@ def index():
 def checkin():
     return flask.render_template("checkin.html")
 
-@app.route('/eugbvt')
+@app.route('/grab')
 def eugbvt():
-    app.logger.debug("Eugene to Beaverton")
-    return flask.render_template('eugbvt.html')
+    app.logger.debug("Grab Bag 200/300")
+    return flask.render_template('grabbag.html')
 
 @app.route('/alsea')
 def alsea():
