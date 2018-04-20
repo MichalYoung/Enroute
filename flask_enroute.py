@@ -23,7 +23,7 @@ import measure
 # Globals
 ###
 app = flask.Flask(__name__)
-app.logger.setLevel(logging.DEBUG)  # FIXME: from config file
+app.logger.setLevel(logging.INFO)  # FIXME: from config file
 
 ###
 # Pages

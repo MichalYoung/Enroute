@@ -78,7 +78,7 @@ from pymongo import MongoClient
 
 import logging
 logging.basicConfig(format='%(levelname)s:%(message)s',
-                        level=logging.DEBUG)
+                        level=logging.INFO)
 log = logging.getLogger(__name__)
 
 # Configurable ... 
