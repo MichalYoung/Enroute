@@ -1,0 +1,122 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html> <head>
+<title>Fl&eacute;che Northwest 2018</title>
+ <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css"
+   integrity="sha512-M2wvCLH6DSRazYeZRIm1JnYyh22purTM+FDB5CsyxtQJYeKq83arPe5wgbNmcFXGqiSH2XR8dT/fJISVA1r/zQ=="
+crossorigin=""/>
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<style>
+body {
+    padding: 0;
+    margin: 0;
+}
+html, body, #map {
+    height: 100%;
+}
+.rider-icon { background-color: #00cc00;
+               color: #ff0000;
+               width: auto; }
+         }
+</style>
+<script
+  src="https://code.jquery.com/jquery-3.2.1.min.js"
+  integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+  crossorigin="anonymous"></script>
+</head>
+
+<body>
+
+<div id="map" style="height: 100%;"></div>
+<div id="log"></div>
+
+<script src="{{url_for("static", filename="js/dist/enroute.js")}}"></script>
+
+<script>
+
+var options = {
+center:  [46.7316054,-122.8271152],
+    zoom: 7,
+spot_feeds: [    { name: "Chris A., Chris C., Michal",
+                   feed: "0GiLP5jn9iVj8z8qm90QaTnkpygdAmouk", 
+                   color: "#FF7F7F",
+                   distances: "ducks_dists.json"
+                }
+                , { name: "Keith, Susan, Naryan, Eddie",
+                   feed: "0p48pzpd24aJvEhJbtZFLbALdgIJ3mqo9", 
+                   color: "#0066ff", 
+                   distances: "chafing_dists.json"
+                }
+                , { name: "Susan, Keith, Naryan, Eddie",
+                   feed: "00cDBSznguqOjfiTBUdqdEl9pldbz1OSa", 
+                   color: "#0066ff", 
+                   distances: "chafing_dists.json"
+                }
+                , {
+       name: "Ian, Sierra, Corey, Stefanie, Brad, Susan, Josh, Rick",
+                   feed: "0RAGll9ai3P2Fy8B4LMQQarMLMIrKqvjW", 
+                   color: "#0066ff", 
+                   distances: "toutling_dists.json"
+                }
+		
+], 
+routes:  [
+{ points: "ducks_points.json",
+distances: "ducks_dists.json",
+color:  "#FF7F7F",
+name: "Ducks Fly North",
+zoomto: false}
+,{ points: "crackers_points.json",
+distances: "crackers_dists.json",
+color:  "#FF00FF",
+name: "Graham's Crackers",
+zoomto: false}
+,{ points: "tasty_points.json",
+distances: "tasty_dists.json",
+color:  "#196666",
+name: "Tasty Randos",
+zoomto: false}
+,{ points: "bcbunch_points.json",
+distances: "bcbunch_dists.json",
+color:  "#942193",
+name: "BC Bunch",
+zoomto: false}
+,{ points: "chafing_points.json",
+distances: "chafing_dists.json",
+color:  "#4040FF",
+name: "Chafing the Dream",
+zoomto: false}
+,{ points: "toutling.json",
+distances: "toutling_dists.json",
+color:  "#00FFFF",
+name: "Toutling Tandems Plus Two",
+zoomto: false}
+,{ points: "cowlitz_points.json",
+distances: "cowlitz_dists.json",
+color:  "#196666",
+name: "Somewhere in Bum Fleche'n Cowlitz",
+zoomto: false}
+,{ points: "spiders_points.json",
+distances: "spiders_dists.json",
+color:  "#FF2600",
+name: "Lake Spiders",
+zoomto: false}
+,{ points: "phinney_points.json",
+distances: "phinney_dists.json",
+color:  "#30A6BD",
+name: "Team Phinney",
+zoomto: false}
+,{ points: "hotdog_points.json",
+distances: "hotdog_dists.json",
+color:  "#E6E600",
+name: "2 Vegans and a Hotdog",
+zoomto: false}
+
+
+]
+}; 
+var tracking = new Enroute(options);
+
+</script>
+
+</body> </html>
