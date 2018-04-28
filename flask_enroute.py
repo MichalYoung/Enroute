@@ -58,7 +58,7 @@ def alsea():
     return flask.render_template('alsea.html')
 
 @app.route('/capes')
-def alsea():
+def capes():
     app.logger.debug("Three Capes")
     return flask.render_template('capes.html')
 
