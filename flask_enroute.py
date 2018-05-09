@@ -48,7 +48,7 @@ def checkin():
     return flask.render_template("checkin.html")
 
 @app.route('/fleche')
-def eugbvt():
+def fleche():
     app.logger.debug("Fleche 2018")
     return flask.render_template('fleche.html')
 
@@ -56,6 +56,11 @@ def eugbvt():
 def alsea():
     app.logger.debug("Alsea")
     return flask.render_template('alsea.html')
+
+@app.route('/oly')
+def oly():
+    app.logger.debug("Oly 600")
+    return flask.render_template('oly600.html')
 
 @app.route('/capes')
 def capes():
