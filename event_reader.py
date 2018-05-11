@@ -46,6 +46,7 @@ class EventRecord(object):
         self.name = event_name
         self.loaded = False
         self.errmsg = "No error message was generated"
+        self.title = "Brevet Progress"
         self.riders = [ ]
         self.routes = [ ]
         self.attempt_load()
@@ -64,8 +65,13 @@ class EventRecord(object):
                     if row[0].strip().startswith("#"):
                         continue
                     # Content row.  Currently understood commands are
+                    # 'event  event-title'
                     # 'route routename'
                     # 'spot routename riderName GID'
+                    if row[0] == "event":
+                        log.debug(f"event {row}")
+                        self.title = row[1]
+                        continue
                     if row[0] == "route":
                         log.debug(f"'route' record, row={row}")
                         command, abbrev, name = row[0:3]
