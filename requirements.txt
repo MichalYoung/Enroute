@@ -1,9 +1,14 @@
 arrow
+click
 Flask
 geopy
 gpxpy
 gunicorn
+itsdangerous
+Jinja2
+MarkupSafe
 pymongo
 python-dateutil
+six
 utm
-
+Werkzeug
