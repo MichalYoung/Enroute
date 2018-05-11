@@ -1,0 +1,63 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html> <head>
+<title>How far along?</title>
+ <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css"
+   integrity="sha512-M2wvCLH6DSRazYeZRIm1JnYyh22purTM+FDB5CsyxtQJYeKq83arPe5wgbNmcFXGqiSH2XR8dT/fJISVA1r/zQ=="
+crossorigin=""/>
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<style>
+body {
+    padding: 0;
+    margin: 0;
+}
+html, body, #map {
+    height: 100%;
+}
+.rider-icon { background-color: #00cc00;
+               color: #ff0000;
+               width: auto; }
+         }
+</style>
+<script
+  src="https://code.jquery.com/jquery-3.2.1.min.js"
+  integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+  crossorigin="anonymous"></script>
+</head>
+
+<body>
+
+<div id="map" style="height: 100%;"></div>
+<div id="log"></div>
+
+<script src="{{url_for("static", filename="js/dist/enroute.js")}}"></script>
+
+<script>
+
+var options = {
+spot_feeds: [
+    {% for rider in g.event.riders %}
+    {  feed: "{{rider.spot}}",
+        name: "{{rider.name}}",
+        color: "{{ rider.color }}",
+        distances: "{{rider.route}}_dists.json"
+    },
+    {%  endfor %}
+
+    ],
+    routes:  [
+        {%  for route in g.event.routes %}
+        { points: "{{route.abbrev}}_points.json",
+               distances: "{{route.abbrev}}_dists.json",
+               color:  "#196666",
+               name: "{{route.name}}",
+               zoomto: true
+               },
+        {%  endfor %}
+               ]
+}; 
+var tracking = new Enroute(options);
+
+</script>
+
+</body> </html>

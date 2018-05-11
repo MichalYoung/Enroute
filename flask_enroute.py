@@ -17,6 +17,7 @@ import subprocess
 
 import spot
 import measure
+import event_reader
 
 
 ###
@@ -66,6 +67,17 @@ def oly():
 def capes():
     app.logger.debug("Three Capes")
     return flask.render_template('capes.html')
+
+# Let's try to generalize the event rides ...
+@app.route('/event/<name>')
+def event(name=None):
+    app.logger.debug(f"Looking for event '{name}'")
+    event_record = event_reader.EventRecord(name)
+    if event_record.loaded:
+        flask.g.event = event_record
+        return flask.render_template('event.html')
+    else:
+        return flask.render_template('404.html'), 404
 
 
 @app.route('/along')
