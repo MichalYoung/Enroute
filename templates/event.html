@@ -38,7 +38,7 @@ var options = {
 spot_feeds: [
     {% for rider in g.event.riders %}
     {  feed: "{{rider.spot}}",
-        name: "{{rider.name}}",
+        name: "{{rider.rider}}",
         color: "{{ rider.color }}",
         distances: "{{rider.route}}_dists.json"
     },
