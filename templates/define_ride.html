@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head;
+        any other head content must come *after* these tags -->
+
+    <title>Enroute: Create Event</title>
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet"
+       href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+       integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+       crossorigin="anonymous"> 
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+<div class="container">
+<h1>Create Event</h1>
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul class=flashes>
+    {% for message in messages %}
+      <li>{{ message }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+
+ <form action="_define_event">
+
+ <div class="row">
+ <div class="col-md-4">
+   <label for="event_name">Event name:</label>
+   <input type="text" size=30
+    placeholder="Example: Three Capes 2019"></input>
+ </div> <!-- col -->
+ </div> <!-- row -->
+
+ <div class="row"><div class="col-md-1">
+   <!-- spacer --> &nbsp;
+ </div> </div>
+
+ {% for route_idx in range(3) %}
+    <div class="row">
+    <div class="col-md-6">
+    <span class="route_entry">
+      <label for="route_id">Route</label>
+      <input type="text" name="route_id" placeholder="e.g. 7755"></input>
+      <input type="text" name="route_name" value="" readonly
+          tabindex="-1"></input>
+     </span>
+     </div> <!-- col -->
+     </div> <!-- row -->
+  {% endfor %}
+
+ <div class="row"> <div class="col-md-1">
+ <!-- spacer --> &nbsp;
+ </div></div>
+
+{% for rider in range(3) %}
+<div class="rider">
+
+   <div class="row">
+   <div class="col-md-4">
+     <label for="rider_name">Rider</label>
+     <input type="text" name="rider_name" size=35
+      placeholder="Name as it appears in popup"></input>
+   </div> <!-- col -->
+   <div class="col-md-4">
+    <label for="spot_url">Spot </label>
+    <input type="url" name="spot_url" class="spot_url"
+           placeholder="Public page URL or gLid"
+          size="35">
+    </div> <!-- col -->
+    </div> <!-- row -->
+    <div class="row">
+    <div class="col-md-9">
+      <span class="urlmsg"></span>
+    </div> <!-- col -->
+    </div> <!-- row -->
+</div> <!-- rider -->
+{% endfor %}
+</form>
+
+
+
+
+
+</div> <!-- container -->
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+   <script
+    src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+    integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+crossorigin="anonymous"></script>
+
+    <script>
+    console.log("Setting listener");
+    $('input[name="route_id"]').change(
+    function() {
+       var route_num = $(this).val();
+       console.log("Route number:" + route_num);
+       var route_row = $(this).parents(".route_entry");
+       var route_name_field = route_row.find("input[name='route_name']");
+       var old_name = route_name_field.val();
+       console.log("Old name ->" + old_name + "<-"); 
+       route_name_field.val("Name goes here");
+    });
+
+    
+    $('input[name="spot_url"]').change(
+    function() {
+      var url_field = $(this);
+      var page_url = url_field.val();
+      var spot_entry = $(this).parents(".rider");
+      var urlmsg = spot_entry.find(".urlmsg");
+      urlmsg.html("<p>Checking</p>"); 
+      var gid;
+      if (page_url.length == 33) {
+      	 gid = page_url;
+      } else {
+         gid = page_url.split("/").slice(-1)[0].split("=").slice(-1)[0];
+      }
+      console.log("Device id ->" + gid + "<-"); 
+      if (gid.length == 0) {
+	 urlmsg.html("<p>(No spot)</p>");
+	 this.setCustomValidity('');
+	 console.log("No Spot to track (ok)");
+      } else if (gid.length == 33) {
+	 urlmsg.html("<p>Looks plausible ...</p>");
+	 this.setCustomValidity('');
+	 url_field.val(gid);
+	 console.log("Accepted spot URL");
+      } else {
+      	 this.setCustomValidity(
+	    "This URL does not end with the 33-character Spot device ID");
+	 urlmsg.html(
+	   "<p>URL should look like this: " +
+	     "http://share.findmespot.com/shared/faces/viewspots.jsp?glId=0GiLP5jn9iVj8z8qm90QaMnkpyxdAmruk </p>")
+	 console.log("Rejected spot gid " + gid);
+         console.log("Length was " + gid.length);
+      }
+    });
+
+
+
+    </script>
+
+
+</body>
+</html>

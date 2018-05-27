@@ -1,0 +1,11 @@
+Improperly marked as off-route on Crows Nest 1000:
+
+Latitude : 48.48615
+Longitude : -122.18065
+
+Why?
+By hand I get distance 16.4km, in the right neighborhood.  Maybe a
+timing issue with loading distances?
+
+
+
