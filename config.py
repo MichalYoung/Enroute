@@ -15,7 +15,7 @@ import configparser
 
 config_file_path = "app.conf"
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 
 config_keys = [ "app_key", "debug", "port", "host" ]
 config_dict = { }
@@ -28,16 +28,23 @@ if os.path.exists(config_file_path):
     have_file = True
     config = configparser.ConfigParser()
     config.read(config_file_path)
+    for group in config:
+        for key in config[group]:
+            logging.debug(f"Config[{group}][{key}] = {config[group][key]}") 
+
 else:
     logging.info("No configuration file present")
 
 # The only API function
 #
 def get(key):
+    logging.debug(f"Looking up configuration key '{key}'")
     if key in os.environ:
         val = os.environ[key]
+        logging.debug(f"Found config value '{val}' in environment")
     elif have_file: 
         val= config['DEFAULT'][key]
+        logging.debug(f"Found config value '{val}' in config file")
     else:
         raise NameError("Config option not defined: {}".format(key))
     

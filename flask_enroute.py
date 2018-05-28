@@ -10,7 +10,7 @@ from werkzeug.utils import secure_filename
 
 import json
 import logging
-import configparser
+import config
 
 import arrow      
 import subprocess
@@ -24,7 +24,11 @@ import event_reader
 # Globals
 ###
 app = flask.Flask(__name__)
-app.logger.setLevel(logging.INFO)  # FIXME: from config file
+app.debug=config.get("debug")
+app.secret_key = config.get("app_key")
+app.logger.setLevel(logging.INFO)
+if app.debug:
+    app.logger.setLevel(logging.DEBUG)
 
 ###
 # Pages
@@ -32,6 +36,14 @@ app.logger.setLevel(logging.INFO)  # FIXME: from config file
 
 @app.route("/")
 def root():
+    app.logger.debug("Entering at root, checking config")
+    try:
+        root = config.get("root")
+        app.logger.debug(r"config returned rooot '{root}'")
+        return flask.redirect(flask.url_for(root))
+    except Exception as e:
+        app.logger.debug(f"Exception {e} looking for root in config")
+        app.logger.debug("No root configured")
     return flask.redirect(flask.url_for("index"))
 
 @app.route("/index")
@@ -58,10 +70,17 @@ def alsea():
     app.logger.debug("Alsea")
     return flask.render_template('alsea.html')
 
-@app.route('/oly')
-def oly():
-    app.logger.debug("Oly 600")
-    return flask.render_template('oly600.html')
+@app.route('/cascade')
+def cascade():
+    app.logger.debug("Cascade 1200")
+    event_record = event_reader.EventRecord("cascade")
+    app.logger.debug(f"event_record.landmarks: {event_record.landmarks}")
+    if event_record.loaded:
+        flask.g.event = event_record
+        return flask.render_template('cascade.html')
+    else:
+        return flask.render_template('404.html'), 404
+
 
 @app.route('/capes')
 def capes():
@@ -71,7 +90,7 @@ def capes():
 # Let's try to generalize the event rides ...
 @app.route('/event/<name>')
 def event(name=None):
-    app.logger.debug(f"Looking for event '{name}'")
+    app.logger.debug(f"Looking for {name}'")
     event_record = event_reader.EventRecord(name)
     if event_record.loaded:
         flask.g.event = event_record
