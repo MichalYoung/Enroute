@@ -83,12 +83,13 @@ class EventRecord(object):
         return
 
     def _row_spot(self, row: list):
+        log.debug(f"Reading spot record: {row}")
         command, route, name, gid, color = row
         if  not self.route_is_defined(route):
             log.debug("Undefined route in rider record")
             raise InputError(f"Undefined route reference in {row}")
-            self.riders.append(SpotTrack(name,gid,route,color))
-            return
+        self.riders.append(SpotTrack(name,gid,route,color))
+        return
 
     def _row_landmark(self, row: list):
         """Landmarks can be control, overnight, info-control, 
