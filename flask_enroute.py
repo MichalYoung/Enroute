@@ -39,7 +39,7 @@ def root():
     app.logger.debug("Entering at root, checking config")
     try:
         root = config.get("root")
-        app.logger.debug(r"config returned rooot '{root}'")
+        app.logger.debug(f"config returned rooot '{root}'")
         return flask.redirect(flask.url_for(root))
     except Exception as e:
         app.logger.debug(f"Exception {e} looking for root in config")
