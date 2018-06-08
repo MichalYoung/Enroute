@@ -50,7 +50,7 @@ spot_feeds: [
         {%  for route in g.event.routes %}
         { points: "{{route.abbrev}}_points.json",
                distances: "{{route.abbrev}}_dists.json",
-               color:  "#196666",
+               color:  "{{route.color}}",
                name: "{{route.name}}",
                zoomto: true
                },

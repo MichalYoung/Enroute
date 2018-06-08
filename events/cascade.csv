@@ -1,11 +1,12 @@
 event,SIR Cascade 1200,,,
 # SIR Cascade 1200 2018,,Event name,,
-route,Cascade,Cascade 1200,,
+route,Cascade,Cascade 1200,#196666,
+route,c12-d1-alt,Day 1 ALT,#f48c42,
 #Spot tracks,Track name,Rider Name,Device GID,Icon color
 #spot,Cascade ,Michal Young,0GiLP5jn9iVj8z8qm90QaTnkpygdAmouk,#1019ba
 spot,Cascade,Susan Otcenas,00cDBSznguqOjfiTBUdqdEl9pldbz1OSa,#EB1313
 spot,Cascade,Noel Howes,02TLEi94cjZob6J537Cda9eBcZhzisHmn,#42f49e
-spot,Cascade,Chris Heg,0fJGWbDLdHeB4LGHAY5PxhandoZDfp98h,#424ef4
+#spot,Cascade,Chris Heg,0fJGWbDLdHeB4LGHAY5PxhandoZDfp98h,#424ef4
 ,,,,
 #Landmarks,Lat,Lon,Title,Desc
 info-control,47.37906422,-122.2677791,Info Control - KENT,
@@ -29,3 +30,6 @@ summit,45.96737908,-120.4005432,Summit Bickleton Grade,
 summit,48.39729713,-119.866333,Loup Loup Pass Summit,
 summit,48.52570025,-120.6463623,Washington Pass Summit,
 summit,48.53661318,-120.7521057,Rainy Pass Summit,
+# Pre-ride,,,,
+control,46.0098543,-122.844979763031,CONTROL-KALAMA,
+control,46.89011426,-122.68896102905273,CONTROL-RAINIER,

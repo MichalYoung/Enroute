@@ -27,12 +27,13 @@ class SpotTrack(object):
 class Route(object):
     """Information about a track"""
 
-    def __init__(self, abbrev: str, name: str):
+    def __init__(self, abbrev: str, name: str, color: str):
         """abbrev is the abbreviated name, e.g., 'eden'
         name is the full name, e.g., 'Eden's Gate 2018'
         """
         self.abbrev = abbrev
         self.name = name
+        self.color = color
 
     def __repr__(self):
         return f"Route('{self.abbrev}', '{self.name}')"
@@ -76,8 +77,10 @@ class EventRecord(object):
     def _row_route(self, row: list):
         """Map a route name to route files"""
         log.debug(f"'route' record, row={row}")
-        command, abbrev, name = row[0:3]
-        route = Route(abbrev, name)
+        if len(row) == 3:
+            row.append("#196666") # Default path color
+        command, abbrev, name, color = row[0:4]
+        route = Route(abbrev, name, color)
         self.routes.append(route)
         log.debug(f"Appended route {route}")
         return
