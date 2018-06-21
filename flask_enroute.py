@@ -13,7 +13,6 @@ import logging
 import config
 
 import arrow      
-import subprocess
 
 import spot
 import measure
@@ -29,6 +28,11 @@ app.secret_key = config.get("app_key")
 app.logger.setLevel(logging.INFO)
 if app.debug:
     app.logger.setLevel(logging.DEBUG)
+
+# For configuration from spreadsheets
+UPLOAD_FOLDER = "UPLOADS"
+ALLOWED_EXTENSIONS = set(['xlsx'])
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 ###
 # Pages
@@ -137,6 +141,9 @@ def along():
 def def_ride():
     return flask.render_template('define_ride.html')
 
+@app.route('/susan')
+def susan():
+    return flask.render_template('susan.html')
 
 
 ######
@@ -161,7 +168,34 @@ def initiate_tracker():
                                              name=rider_name))
     # return flask.redirect(flask.url_for("utm_test",route=route,
     #                                         gid=gid,
-    #                                         name=rider_name))
+    #                                   name=rider_name))
+
+@app.route('/_configure_c12', methods=["POST"])
+def configure_c12():
+    app.logger.debug(f"flask.request is {flask.request}")
+    app.logger.debug(f"flask.request.files is {flask.request.files}")
+    for f in flask.request.files:
+        app.logger.debug(f"flask.request.files['{f}'] = {flask.request.files[f]}")
+    if 'file' not in flask.request.files:
+        flask.flash("File not provided")
+        flask.flash(f"request.files is '{flask.request.files}'")
+        return flask.redirect(flask.url_for("susan"))
+    file = flask.request.files['file']
+    if file.filename == "":
+        flask.flash("File not provided (empty)")
+        return flask.redirect(flask.url_for("susan"))
+    if allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        flask.flash(f"Uploaded {file.filename}")
+        return flask.redirect(flask.url_for("susan"))
+
+
+
+
+def allowed_file(filename):
+    return '.' in filename and \
+      filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 ######
@@ -234,6 +268,8 @@ def get_riders():
     # return jsonify(result=result)
     app.logger.debug("Sending tracks: |{}|".format(tracks))
     return json.dumps(tracks)
+
+
 
 ####
 # Ajax for database lookups

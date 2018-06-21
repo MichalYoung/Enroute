@@ -42,7 +42,8 @@ def get(key):
     if key in os.environ:
         val = os.environ[key]
         logging.debug(f"Found config value '{val}' in environment")
-    elif have_file: 
+    elif have_file:
+        logging.debug(f"No key '{key}' in os.environ")
         val= config['DEFAULT'][key]
         logging.debug(f"Found config value '{val}' in config file")
     else:

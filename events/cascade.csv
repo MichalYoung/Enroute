@@ -1,12 +1,13 @@
 event,SIR Cascade 1200,,,
 # SIR Cascade 1200 2018,,Event name,,
 route,Cascade,Cascade 1200,#196666,
-route,c12-d1-alt,Day 1 ALT,#f48c42,
+#route,c12-d1-alt,Day 1 ALT,#f48c42,
 #Spot tracks,Track name,Rider Name,Device GID,Icon color
 #spot,Cascade ,Michal Young,0GiLP5jn9iVj8z8qm90QaTnkpygdAmouk,#1019ba
 spot,Cascade,Susan Otcenas,00cDBSznguqOjfiTBUdqdEl9pldbz1OSa,#EB1313
 spot,Cascade,Noel Howes,02TLEi94cjZob6J537Cda9eBcZhzisHmn,#42f49e
-#spot,Cascade,Chris Heg,0fJGWbDLdHeB4LGHAY5PxhandoZDfp98h,#424ef4
+spot,Cascade,Chris Heg,0IHXOW2qV9syrEqWAl1FGOISdcDhLLVTH,#424ef4
+
 ,,,,
 #Landmarks,Lat,Lon,Title,Desc
 info-control,47.37906422,-122.2677791,Info Control - KENT,

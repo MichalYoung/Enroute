@@ -2,7 +2,7 @@
 The enroute functionality tied to spot trackers, 
 including caching in a MongoDB database. 
 
-A spot feed normall looks like this: 
+A spot feed normally looks like this:
 
 [ {'@clientUnixTime': '0', 
     'id': 821374484, 
@@ -73,7 +73,7 @@ import json
 import arrow
 import time
 import urllib.request
-import configparser
+import config
 from pymongo import MongoClient
 
 import logging
@@ -82,10 +82,8 @@ logging.basicConfig(format='%(levelname)s:%(message)s',
 log = logging.getLogger(__name__)
 
 # Configurable ... 
-config = configparser.ConfigParser()
-config.read("config.ini")
-MONGO_URL=config["DEFAULT"]["mongo_url"]
-QUERY_INTERVAL_MINUTES = int(config["DEFAULT"]["query_interval_minutes"])
+MONGO_URL=config.get("mongo_url")
+QUERY_INTERVAL_MINUTES = int(config.get("query_interval_minutes"))
 
 URL_API = "https://api.findmespot.com/spot-main-web/consumer/rest-api/2.0/public/feed/{}/message.json"
 
@@ -140,10 +138,9 @@ def get_feeds(feedlist):
                 collection.update_one(  {"id": feed },
                                         {"$set": record }  )
 
-        if "_id" in record: 
-            del record["_id"]  # Because it isn't JSON serializable
-        if "latest" in record and record["latest"] != {}:
-            feeds.append(record)
+                if "_id" in record:
+                    del record["_id"]  # Because it isn't JSON serializable
+
     return feeds
 
 def spot_direct_query(feed):
