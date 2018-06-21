@@ -26,7 +26,7 @@ import device_assignments
 app = flask.Flask(__name__)
 app.debug=config.get("debug")
 app.secret_key = config.get("app_key")
-app.logger.setLevel(logging.INFO)
+app.logger.setLevel(logging.DEBUG)
 if app.debug:
     app.logger.setLevel(logging.DEBUG)
 
