@@ -17,6 +17,7 @@ import arrow
 import spot
 import measure
 import event_reader
+import device_assignments
 
 
 ###
@@ -29,9 +30,12 @@ app.logger.setLevel(logging.INFO)
 if app.debug:
     app.logger.setLevel(logging.DEBUG)
 
+
 # For configuration from spreadsheets
 UPLOAD_FOLDER = "UPLOADS"
 ALLOWED_EXTENSIONS = set(['xlsx'])
+SUSAN_PW = config.get("susan_pw")
+
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 ###
@@ -172,25 +176,36 @@ def initiate_tracker():
 
 @app.route('/_configure_c12', methods=["POST"])
 def configure_c12():
-    app.logger.debug(f"flask.request is {flask.request}")
-    app.logger.debug(f"flask.request.files is {flask.request.files}")
-    for f in flask.request.files:
-        app.logger.debug(f"flask.request.files['{f}'] = {flask.request.files[f]}")
-    if 'file' not in flask.request.files:
-        flask.flash("File not provided")
-        flask.flash(f"request.files is '{flask.request.files}'")
+    try:
+        app.logger.debug(f"flask.request is {flask.request}")
+        app.logger.debug(f"flask.request.files is {flask.request.files}")
+        for f in flask.request.files:
+            app.logger.debug(f"flask.request.files['{f}'] = {flask.request.files[f]}")
+        if 'file' not in flask.request.files:
+            flask.flash("File not provided")
+            flask.flash(f"request.files is '{flask.request.files}'")
+            return flask.redirect(flask.url_for("susan"))
+        file = flask.request.files['file']
+        if file.filename == "":
+            flask.flash("File not provided (empty)")
+            return flask.redirect(flask.url_for("susan"))
+        if flask.request.form["password"] != SUSAN_PW:
+            flask.flash("That's not Susan's password. Thick of the chickens.  All lower case, three words.")
+            return flask.redirect(flask.url_for("susan"))
+        if allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(path)
+            flask.flash(f"Uploaded {file.filename}")
+            device_assignments.configure(path)
+            flask.flash(f"Configured from {path}")
+            return flask.redirect(flask.url_for("susan"))
+        else:
+            flask.flash("Wrong file type; I need the Excel .xlsx file")
+            return flask.redirect(flask.url_for("susan"))
+    except Exception as e:
+        flask.flash(f"D'oh.  Encountered internal error: {e}")
         return flask.redirect(flask.url_for("susan"))
-    file = flask.request.files['file']
-    if file.filename == "":
-        flask.flash("File not provided (empty)")
-        return flask.redirect(flask.url_for("susan"))
-    if allowed_file(file.filename):
-        filename = secure_filename(file.filename)
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        flask.flash(f"Uploaded {file.filename}")
-        return flask.redirect(flask.url_for("susan"))
-
-
 
 
 def allowed_file(filename):

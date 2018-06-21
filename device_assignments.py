@@ -73,6 +73,10 @@ def get_assignments() -> dict:
     assignments = collection.find_one({"kind": "assignments"})
     return assignments
 
+def configure(file_name: str):
+    assignments = read_assignments(file_name)
+    save_assignments(assignments)
+
 
 if __name__ == "__main__":
     assignments = read_assignments("SPOT_assignments.xlsx")
