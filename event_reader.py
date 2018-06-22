@@ -98,9 +98,10 @@ class EventRecord(object):
         """Landmarks can be control, overnight, info-control, 
         or summit. 
         """
-        icons = { "control": "marker",
+        icons = { "control": "library",
                 "overnight": "lodging",
-                "info-control": "marker"
+                "info-control": "marker",
+                "summit": "triangle"
                 }
         if len(row) < 4:
             row.append("")
