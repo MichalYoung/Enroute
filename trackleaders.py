@@ -66,6 +66,8 @@ def tracks_from_cache(feed_list: List[str]) -> List[dict]:
             #for feed in feed_list:
             #track = collection.find_one({"id": feed})
             #if track is not None:
+                if "_id" in feed:
+                    del feed["_id"]   # Because it isn't json serializable
                 feeds.append(feed)
     log.debug("Done with tracks from cache")
     return feeds
@@ -116,11 +118,6 @@ def cache_reload():
     requests = [ ]
     for track in tracks:
         requests.append(ReplaceOne({"id": track["id"]}, track, upsert=True))
-        #record = collection.find_one(request)
-        #if record is None:
-        #   collection.insert_one(track)
-        #else:
-        #   collection.update_one(request, {"$set": track})
     result = collection.bulk_write(requests)
     log.debug(f"Done  updating Mongo, replaced {result.modified_count}")
     log.debug("Done reloading cache")
@@ -210,6 +207,10 @@ def reformat(messages: List[dict]) -> List[dict]:
     table = {}
     for msg in messages:
         esn = msg["esn"]
+        # TrackLeaders tags powered off spots with bogus lat and lon values of -9999.0.
+        # Those break things.  Skip them.
+        if float(msg["latitude"]) < -90:
+            continue
         if esn not in table:
             initial = {
                 "id": esn,

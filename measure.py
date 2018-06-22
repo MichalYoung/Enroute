@@ -14,6 +14,7 @@ import logging
 logging.basicConfig(format='%(levelname)s:%(message)s',
                         level=logging.INFO)
 log = logging.getLogger(__name__)
+log.setLevel(logging.INFO)
 
 # --------------------------------------
 # Parameter constants
@@ -227,9 +228,9 @@ def interpolate_route_distance(lat, lon, utm_track, utm_zone, prior_obs=None):
                 continue
 
         measured_point_count += 1
-        log.debug("Observation {:2,.2f},{:2,.2f}".format(obs_east, obs_north))
-        log.debug(" measure to {:2,.2f},{:2,.2f}".format(east_1, north_1))
-        log.debug("         -> {:2,.2f},{:2,.2f}".format(east_2, north_2))
+        #log.debug("Observation {:2,.2f},{:2,.2f}".format(obs_east, obs_north))
+        #log.debug(" measure to {:2,.2f},{:2,.2f}".format(east_1, north_1))
+        #log.debug("         -> {:2,.2f},{:2,.2f}".format(east_2, north_2))
 
         close_east, close_north = \
           closest_point(east_1, north_1,
@@ -245,12 +246,12 @@ def interpolate_route_distance(lat, lon, utm_track, utm_zone, prior_obs=None):
             _, _, from_dist = prev
             _, _, to_dist = pt
             frac = (close_east - east_1) / (east_2 - east_1)
-            log.debug("Interpolating distance at {:2,f} between ".format(frac))
-            log.debug("   between {:2,f}km and {:2,f}km"
-                          .format(from_dist, to_dist))
+            #log.debug("Interpolating distance at {:2,f} between ".format(frac))
+            #log.debug("   between {:2,f}km and {:2,f}km"
+            #              .format(from_dist, to_dist))
             inter_dist = from_dist + frac * (to_dist - from_dist)
-            log.debug("New min distance recorded")
-    log.debug("Skipped {}, measured {}, took new min {} times"
+            #log.debug("New min distance recorded")
+            log.debug("Skipped {}, measured {}, took new min {} times"
                   .format(skipped_point_count,
                               measured_point_count,
                               new_min_count))

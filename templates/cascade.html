@@ -30,22 +30,45 @@ html, body, #map {
 <div id="map" style="height: 100%;"></div>
 <div id="log"></div>
 
-<script src="{{url_for("static", filename="js/dist/enroute.js")}}"></script>
+<script src="{{url_for("static", filename="js/dist/cascade.js")}}"></script>
 
 <script>
 
 
 var options = {
-spot_feeds: [
-    {% for rider in g.event.riders %}
-    {  feed: "{{rider.spot}}",
-        name: "{{rider.rider}}",
-        color: "{{ rider.color }}",
-        distances: "{{rider.route}}_dists.json"
-    },
-    {%  endfor %}
+ spot_feeds: [
 
+    <!-- Personal spots from spreadsheet -->
+
+    {% for rider in g.spots.personal_spots %}
+    { feed: "{{rider.gid}}",
+      name: "{{rider.rider}}",
+      color: "#4277f4",
+      distances: "Cascade_dists.json"
+    },
+    {% endfor %}
+
+    <!-- Support vehicle spots from spreadsheet -->
+    {% for rider in g.spots.support_spots %}
+    { feed: "{{rider.gid}}",
+      name: "{{rider.rider}}",
+      color: "#000000",
+      distances: "Cascade_dists.json"
+    },
+    {% endfor %}
     ],
+
+    rental_spots: [
+    <!-- From spreadsheet -->
+    {% for rider in g.spots.trackleaders_spots  %}
+    { feed: "{{rider.esn}}",
+      name: "{{rider.rider}}",
+      color: "#3c6de0",
+      distances: "Cascade_dists.json"
+    },
+    {% endfor %}
+    ],
+
     routes:  [
         {%  for route in g.event.routes %}
         { points: "{{route.abbrev}}_points.json",

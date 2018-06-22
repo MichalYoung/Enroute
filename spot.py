@@ -133,13 +133,21 @@ def get_feeds(feedlist):
         # but here we'll update its last query time even if there
         # are no records available from Spot. This is to ensure
         # we poll it at the same rate as Spots with data, not faster. 
-        if is_stale(last_queried): 
+        if is_stale(last_queried):
+            try:
                 record = spot_direct_query(feed)
                 collection.update_one(  {"id": feed },
                                         {"$set": record }  )
-
                 if "_id" in record:
                     del record["_id"]  # Because it isn't JSON serializable
+            except BadSpotFeed as e:
+                log.warn(f"Bad spot feed: {feed}")
+
+        if "_id" in record:
+            del record["_id"]  # Because it isn't JSON serializable
+        if "latest" in record and record["latest"] != {}:
+            feeds.append(record)
+
 
     return feeds
 

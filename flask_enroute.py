@@ -18,6 +18,7 @@ import spot
 import measure
 import event_reader
 import device_assignments
+import trackleaders
 
 
 ###
@@ -82,9 +83,11 @@ def alsea():
 def cascade():
     app.logger.debug("Cascade 1200")
     event_record = event_reader.EventRecord("cascade")
+    spots = device_assignments.get_assignments()
     app.logger.debug(f"event_record.landmarks: {event_record.landmarks}")
     if event_record.loaded:
         flask.g.event = event_record
+        flask.g.spots = spots
         return flask.render_template('cascade.html')
     else:
         return flask.render_template('404.html'), 404
@@ -271,6 +274,7 @@ def get_route():
                          .format(route))
     return flask.send_from_directory('static/routes', route)
 
+
 @app.route('/_riders', methods=['GET'])
 def get_riders():
     """
@@ -280,6 +284,20 @@ def get_riders():
     riders = flask.request.args.getlist("feed", type=str)
     app.logger.debug("Getting feeds for {}".format(riders))
     tracks = spot.get_feeds(riders)
+    # return jsonify(result=result)
+    app.logger.debug("Sending tracks: |{}|".format(tracks))
+    return json.dumps(tracks)
+
+
+@app.route('/_tl_riders', methods=['GET'])
+def get_tl_riders():
+    """
+    Ajax request for rider tracks
+    """
+    app.logger.debug("Ajax request for trackleader riders ")
+    riders = flask.request.args.getlist("feed", type=str)
+    app.logger.debug("Getting trackleader feeds for {}".format(riders))
+    tracks = trackleaders.get_tracks(riders)
     # return jsonify(result=result)
     app.logger.debug("Sending tracks: |{}|".format(tracks))
     return json.dumps(tracks)
