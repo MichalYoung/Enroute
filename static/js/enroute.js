@@ -85,7 +85,7 @@ function Enroute(options) {
 
     var app_root = "/";
     if ('app_root' in options) {
-	app_root = options.app_root;
+	    app_root = options.app_root;
     }
     
     if ('center' in options) {
@@ -93,6 +93,7 @@ function Enroute(options) {
     } else {
 		this.center = [40.8890347,-97.154832]; // U.S.
     }
+
     if ('zoom' in options) {
 		this.zoom = options.zoom;
     } else {
@@ -107,15 +108,15 @@ function Enroute(options) {
 	    feeds.push(feed);
 	}
     } else {
-	console.log("No spot feeds requested");
+	    console.log("No spot feeds requested");
     }
     console.log("Riders: " + riders);
     console.log("Feeds: " + feeds);
 
     var utm_file = null;
     if ('utm_file' in options) {
-	utm_file = options.utm_file;
-	this.utm_file = utm_file;
+	    utm_file = options.utm_file;
+	    this.utm_file = utm_file;
     }
 
     var checkin_list = [ ] ;  // Iterate over this to track phone check-ins
@@ -129,10 +130,10 @@ function Enroute(options) {
     // 
 
     if (options.hasOwnProperty("checkins")) {
-	checkins_list = options.checkins;
-	console.log("Got list of phone checkin keys");
+	    checkins_list = options.checkins;
+	    console.log("Got list of phone checkin keys");
     } else {
-	console.log("No phone checkins registered.")
+	    console.log("No phone checkins registered.")
     }
 
     var map = L.map('map', {center:  this.center, zoom: this.zoom});
@@ -141,21 +142,21 @@ function Enroute(options) {
 
     L.tileLayer('https://{s}.tiles.mapbox.com/v3/{id}/{z}/{x}/{y}.png',
     {
-    attribution: 'Map data <a href="https://mapbox.com">Mapbox</a>', 
-    maxZoom: 18,
-    id: "michalyoung.kc01ifbj"
+        attribution: 'Map data <a href="https://mapbox.com">Mapbox</a>',
+        maxZoom: 18,
+        id: "michalyoung.kc01ifbj"        /* Get this from configuration */
     }).addTo(this.map);
 
     this.landmark = function(lat, lon, options) {
         var icon = L.MakiMarkers.icon(
-	    {icon: options.icon || "marker-stroked",
-	     color: options.color || "#FFFF00", 
-	     size: "s"});
+	    {  icon: options.icon || "marker-stroked",
+	       color: options.color || "#FFFF00",
+	       size: "s"
+	    });
         var marker = L.marker([lat, lon],
-			      {
-				  title: options.title || "landmark",	
-				  icon:  icon, 
-				  zIndexOffset: -10
+			      { title: options.title || "landmark",
+				    icon:  icon,
+				    zIndexOffset: -10
 			      }).addTo(map);
 	
         marker.bindPopup( options.popup || "No description provided" );
@@ -164,54 +165,56 @@ function Enroute(options) {
     
 	
     function route_point_describe(latlng, options) {
-	console.log("Describing route point "
+	    console.log("Describing route point "
 		    + latlng + " on " + options.name);
-	if (options.hasOwnProperty("distances")) {
-	    console.log("has distances");
-	    $.getJSON(app_root + "_along", 
+	    if (options.hasOwnProperty("distances")) {
+	        console.log("has distances");
+	        $.getJSON(app_root + "_along",
 		      { lat: latlng.lat,
-			lng: latlng.lng,
-			track: options.distances },
+			    lng: latlng.lng,
+			    track: options.distances
+			  },
 		      function (d) {
-			  var dist_km = Math.round(d.result);
-			  var dist_mi = Math.round(d.result * 0.6213); 
-			  var desc = options.name + "\n" +
+			    var dist_km = Math.round(d.result);
+			    var dist_mi = Math.round(d.result * 0.6213);
+			    var desc = options.name + "\n" +
 			      dist_km + "km (" +
 			      dist_mi + "mi)";
-			  L.popup()
+			    L.popup()
 			      .setLatLng(latlng)
 			      .setContent(desc)
 			      .openOn(map);
-		      });
-	} else {
-	    console.log("no distances"); 
-	    L.popup()
-		.setLatLng(latlng)
-		.setcontent(options.name)
-		.openOn(map);
-	}
+		        });
+	    } else {
+	        console.log("no distances");
+	        L.popup()
+		    .setLatLng(latlng)
+		    .setcontent(options.name)
+		    .openOn(map);
+	    }
     }
 	    
 
     function plot_route( options ) {
-	var points_file = options.points;
-	$.get(app_root + "_get_route?route=" + points_file,
+	    var points_file = options.points;
+	    $.get(app_root + "_get_route?route=" + points_file,
               function(points) {
-		  var route = L.polyline(points,
-		      { color: options.color, weight: 6, opacity: 0.5} );
-		  route.on('click', function(e) {
-		      console.log('click');
-		      route_point_describe(e.latlng, options);
-		  });
-		  route.addTo(map);
-		  if (options.zoomto) {
-		      console.log("Zooming map to route"); 
-		      map.fitBounds(route.getBounds());
-		  } else {
-		      console.log("Not centering map");
-		  }
-	      });
-	console.log("Created route " + options.name);
+		        var route = L.polyline(points,
+		            { color: options.color, weight: 6, opacity: 0.5} );
+		              route.on('click',
+		              function(e) {
+		                console.log('click');
+		                route_point_describe(e.latlng, options);
+		              });
+		        route.addTo(map);
+		        if (options.zoomto) {
+		            console.log("Zooming map to route");
+		            map.fitBounds(route.getBounds());
+		        } else {
+		            console.log("Not centering map");
+		        }
+	          });
+	    console.log("Created route " + options.name);
     }
 	
     this.plot_route = plot_route; 
@@ -249,18 +252,18 @@ function Enroute(options) {
      * See end of this file. 
      */ 
     function query_spots() {
-	console.log("Sending spot query: " + spot_query_url); 
-	$.getJSON(spot_query_url,
+	    console.log("Sending spot query: " + spot_query_url);
+	    $.getJSON(spot_query_url,
 	      function(observations) {
-		  console.log("Received spot data: " + observations + " length "
+		    console.log("Received spot data: " + observations + " length "
 			      + observations.length);
-		  for (var i=0; i < observations.length; ++i) {
-		      console.log("Observation #" + i + " of " +
+		    for (var i=0; i < observations.length; ++i) {
+		        console.log("Observation #" + i + " of " +
 				  observations.length); 
-		      var obs = observations[i];
-		      console.log("Received observation of tracker " + obs.id);
-		      show_track(obs);
-		  }
+		        var obs = observations[i];
+		        console.log("Received observation of tracker " + obs.id);
+		        show_track(obs);
+		    }
 	      });
     }
 
@@ -270,42 +273,41 @@ function Enroute(options) {
          * { id:  spot_id,  latest: { spot observation data },
          *   path: [ points in last hour ] }
          */
-	console.log("Show track: latest=" + JSON.stringify(obs.latest)); 
-	show_position(obs.id, obs.latest);
-	show_path(obs.id, obs.path);
+	    console.log("Show track: latest=" + JSON.stringify(obs.latest));
+	    show_position(obs.id, obs.latest);
+	    show_path(obs.id, obs.path);
     }
 
     /* Create a marker if the rider doesn't already have one; 
      * after ensure_marker it is safe to reference rider.marker.
      */
     function ensure_marker( rider, position ) {
-	if (rider.hasOwnProperty("marker")) {
-	    return;
-	}
-	console.log("Creating a new marker for " + rider.name +
+	    if (rider.hasOwnProperty("marker")) {
+	        return;
+	    }
+	    console.log("Creating a new marker for " + rider.name +
 		    " at " + position); 
         var color = rider.color;
-	var name = rider.name; 
+	    var name = rider.name;
         var bicon = L.MakiMarkers.icon({icon: "bicycle",
 					color: color, size: "m"});
         var marker = L.marker(position,
-			      {
-				  title: name,
-				  icon: bicon, 
-				  riseOnHover: true, 
+			      {  title: name,
+				     icon: bicon,
+				     riseOnHover: true,
 			      }).addTo(map);
-	rider.marker = marker; 
-	return marker;
+	    rider.marker = marker;
+	    return marker;
     }
 
     /* Given an ISO time string, return a humanized description */ 
     function time_desc(time) {
-	console.log("Humanizing time string " + time);
-	obs_time = moment(time); 
+	    console.log("Humanizing time string " + time);
+	    obs_time = moment(time);
         var ago = obs_time.fromNow(); 
         var obs_time_str = obs_time.format("hh:mm a<br />ddd MMM D")
             + "<br />(" + ago + ")";
-	return obs_time_str;
+	    return obs_time_str;
     }
 
     /* Given kilometers measure in full precision, 
@@ -313,42 +315,43 @@ function Enroute(options) {
      * kilometers == -1 is special case signaling "off course"
      */
     function dist_desc(dist_km) {
-	if (dist_km < 0) {
-	    return "off course"
-	}
-	var km_rounded = Math.round(dist_km);
-	var mi_rounded = Math.round(dist_km * 0.6213);
-	var desc = `${km_rounded}km (${mi_rounded}mi)`;
-	return desc;
+	    if (dist_km < 0) {
+	        return "off course"
+	    }
+	    var km_rounded = Math.round(dist_km);
+	    var mi_rounded = Math.round(dist_km * 0.6213);
+	    var desc = `${km_rounded}km (${mi_rounded}mi)`;
+	    return desc;
     }
 
     /* Describe progress including distance along path */ 
     function describe_progress_d(rider, observation, distances) {
-	console.log("describe_progress_d for rider " + rider.name); 
-	ensure_marker(rider); 
-	var marker = rider.marker;
-	var time = observation.dateTime; 
+	    console.log("describe_progress_d for rider " + rider.name);
+	    ensure_marker(rider);
+	    var marker = rider.marker;
+	    var time = observation.dateTime;
         var pos = observation.latlon; 
-	/* pos is NOT a latlng object; it's a list of two elements */
-	var lat = pos[0];
-	var lng = pos[1]; 
-	if (observation.hasOwnProperty("prior_position")) {
-	    prior_lat = observation.prior_position[0]
-	    prior_lng = observation.prior_position[1]
-	} else {
-	    // Default values indicate we don't have a prior observation
-	    prior_lat = 0;
-	    prior_lon = 0;
+	    /* pos is NOT a latlng object; it's a list of two elements */
+	    var lat = pos[0];
+	    var lng = pos[1];
+	    if (observation.hasOwnProperty("prior_position")) {
+	        prior_lat = observation.prior_position[0]
+	         prior_lng = observation.prior_position[1]
+	    } else {
+	         // Default values indicate we don't have a prior observation
+	        prior_lat = 0;
+	        prior_lon = 0;
 	}
 	console.log("Querying for lat and lng " +
 		    lat + ", " + lng)
-	console.log("  ... using distances file  " + distances);
-	$.getJSON(app_root + "_along", 
+	    console.log("  ... using distances file  " + distances);
+	    $.getJSON(app_root + "_along",
 		  { lat: lat,
 		    lng: lng,
 		    prior_lat: prior_lat,
 		    prior_lng: prior_lng, 
-		    track: distances },
+		    track: distances
+		  },
 		  function (d) {
 		      var dist_km = d.result;
 		      var desc = "<p>" + rider.name + "<br />" + 
@@ -361,44 +364,44 @@ function Enroute(options) {
 	
     /* Describe progress as time alone, without distance */
     function describe_progress_t(rider,  latlng, time) {
-	console.log("describe_progress_t for" + rider.name);
-	ensure_marker(rider); 
-	var marker = rider.marker;
-	var when_desc = time_desc(time);
-	console.log("Time description: " + when_desc);
-	var desc = "<p>" + rider.name + "<br />" +  when_desc + "</p>" ;
-	console.log("Popup description: " + desc); 
-	marker.bindPopup(desc);
+	    console.log("describe_progress_t for" + rider.name);
+	    ensure_marker(rider);
+	    var marker = rider.marker;
+	    var when_desc = time_desc(time);
+	    console.log("Time description: " + when_desc);
+	    var desc = "<p>" + rider.name + "<br />" +  when_desc + "</p>" ;
+	    console.log("Popup description: " + desc);
+	    marker.bindPopup(desc);
     }
 	    
     function show_position( id, observation ) {
-	console.log("Handling observation: " + JSON.stringify(observation));
+	    console.log("Handling observation: " + JSON.stringify(observation));
         var position = observation.latlon; 
-	var rider = riders[id];
-	var time = observation.dateTime; 
-	ensure_marker(rider, position); 
-	var marker = rider.marker;
-	marker.setLatLng(position);
-	if (rider.hasOwnProperty("distances")) {
-	    describe_progress_d( rider, observation, rider.distances );
-	} else {
-	    describe_progress_t( rider, position, time );
-	}
+	    var rider = riders[id];
+	    var time = observation.dateTime;
+	    ensure_marker(rider, position);
+	    var marker = rider.marker;
+	    marker.setLatLng(position);
+	    if (rider.hasOwnProperty("distances")) {
+	      describe_progress_d( rider, observation, rider.distances );
+	    } else {
+	     describe_progress_t( rider, position, time );
+	    }
     }
 
 
     function show_path(id, path) {
-	console.log("Plotting trace " + path);
-	var rider = riders[id]; 
+	    console.log("Plotting trace " + path);
+	    var rider = riders[id];
         var name = rider.name;
-	if (rider.hasOwnProperty("trace")) {
+	    if (rider.hasOwnProperty("trace")) {
             console.log("Updating trace");
             var trace = rider.trace;
             trace.setLatLngs(path);
         } else {
             // First trace for this id
             var trace = L.polyline(
-		path, 
+		        path,
                 { weight: 4, color: "#ff0000", opacity: 0.9,
                   dashArray: "3,7"
                 }).addTo(map);
