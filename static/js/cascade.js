@@ -243,16 +243,47 @@ function Enroute(options) {
     /* We will always call the same URL to ask for updates 
      * on all the riders, so we'll calculate the 
      * spot request URL just once. 
-     */
+     *
+     * OBSOLETED June 2018 in favor for chunking
     var spot_query_url= app_root + "_riders";
     var parm_marker = "?feed=";
     for (var i=0; i < feeds.length; ++i) {
-	spot_query_url = spot_query_url + parm_marker + feeds[i];
-	parm_marker = "&feed=";
+	   spot_query_url = spot_query_url + parm_marker + feeds[i];
+	   parm_marker = "&feed=";
     }
     console.log("Spot request URL will be " + spot_query_url + "(length " + spot_query_url.length + ")");
+    */
 
+    /* CHANGE:  With 25 spots, querying all in a batch with 2 second
+     * waits between (to stay within rate limits) can be so slow that we may time out.
+     * So, let's break this into smaller requests, up to 5 trackers at a time.
+     */
 
+    function chunk_spot_urls() { // Returns list of URL parameter strings for query_spot
+        var spot_chunks = [ ]; // A list of URL parameter strings
+        var spot_query_url= app_root + "_riders";
+        var parm_marker = "?feed=";
+        var cur_chunk = spot_query_url;
+        var chunk_spot_count = 0
+        for (var i=0; i < feeds.length; ++i) {
+            cur_chunk = cur_chunk + parm_marker + feeds[i];
+            parm_marker = "&feed="
+            chunk_spot_count += 1;
+            if (chunk_spot_count >= 5) {
+                spot_chunks.push(cur_chunk);
+                cur_chunk = spot_query_url;
+                chunk_spot_count = 0;
+                parm_marker = "?feed=";
+            }
+        }
+        if (chunk_spot_count > 0) {
+            spot_chunks.push(cur_chunk);
+        }
+        return spot_chunks;
+    }
+
+    var spot_urls_chunks = chunk_spot_urls();
+    console.log("Broke personal spots into " + spot_urls_chunks.length + " chunks")
     /* 
      * Expected format of spot observations is 
      * [ { id: spot_id,  latest: { spot observation data }, 
@@ -266,8 +297,10 @@ function Enroute(options) {
      * See end of this file. 
      */ 
     function query_spots() {
-	    console.log("Sending spot query: " + spot_query_url);
-	    $.getJSON(spot_query_url,
+	    for (i=0; i < spot_urls_chunks.length; ++i) {
+	    var query_url = spot_urls_chunks[i];
+	    console.log("Spot chunk " + i + " of " + spot_urls_chunks.length + ": "+ query_url);
+	    $.getJSON(query_url,
 	      function(observations) {
 		    console.log("Received spot data: " + observations + " length "
 			      + observations.length);
@@ -279,6 +312,7 @@ function Enroute(options) {
 		        show_track(obs);
 		    }
 	      });
+	     }
     }
 
     /* Similarly for trackleaders */
