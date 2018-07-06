@@ -58,6 +58,17 @@ spot_feeds: [
 }; 
 var tracking = new Enroute(options);
 
+
+{% for place in g.event.landmarks %}
+   tracking.landmark({{place.lat}}, {{place.lon}}, 
+               {  popup: "{{place.title}}<br />{{place.desc}}",
+                  icon: "{{place.icon}}",
+                  color: "{{place.color}}", 
+                  title: "{{place.title}}"
+                   });
+{% endfor %}
+
+
 </script>
 
 </body> </html>
