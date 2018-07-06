@@ -1,0 +1,14 @@
+event,Night start Eugene-FG-Eugene 400k,,,
+route,night400,Eugene - Forest Grove - Eugene, #196666,
+#Spot tracks,Track name,Rider Name,Device GID,Icon color
+spot,night400,Michal Young,0GiLP5jn9iVj8z8qm90QaTnkpygdAmouk,#1019ba
+#Landmarks,Lat,Lon,Title,Desc
+control,45.5197293,-123.0955839,Forest Grove control,Safeway open 6am.  After 7am Maggies Buns is a few blocks further near Pacific and Main'
+,,,,
+food,44.92359737,-123.0106991,Jacksons open 24 hrs,
+food,44.94103774,-123.0249648,Safeway open till midnight,
+food,44.91201512,-123.1773403,24 hour bakery,
+control,44.85314747,-123.1845331,"Open Control: Independence.  Mootharts Market, others.  Public restrooms on left.  [Open 04:45, close 15:28]",
+food,44.63789628,-123.1063244,"Entering Albany.  First Burger on 1st street, other options. ",
+control,44.14123,-123.07224,Coburg control. Food at Dari Mart.,
+food,44.38684485,-122.98564,"Chevron has restrooms,  convenience store food'",

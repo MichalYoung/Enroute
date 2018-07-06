@@ -92,12 +92,6 @@ def cascade():
     else:
         return flask.render_template('404.html'), 404
 
-
-@app.route('/capes')
-def capes():
-    app.logger.debug("Three Capes")
-    return flask.render_template('capes.html')
-
 # Let's try to generalize the event rides ...
 @app.route('/event/<name>')
 def event(name=None):
