@@ -13,7 +13,11 @@ import os
 import logging
 import configparser
 
-config_file_path = "app.conf"
+# Configuration files, in order of access.  Later in order
+# overrides earlier, so start with public defaults and then
+# visit per-installation and/or per-user secrets for passwords,
+# tokens, etc. 
+CONFIG_FILES = [ "config_public.ini", "config_private.ini"]
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -22,18 +26,17 @@ config_dict = { }
 
 translations = { "true": True, "false": False }
 
+config = configparser.ConfigParser()
 have_file = False
-if os.path.exists(config_file_path):
-    logging.info("Loading configuration file")
-    have_file = True
-    config = configparser.ConfigParser()
-    config.read(config_file_path)
+for config_file_path in CONFIG_FILES: 
+    if os.path.exists(config_file_path):
+        logging.info(f"Loading configuration file {config_file_path}")
+        have_file = True
+        config.read(config_file_path)
+if have_file: 
     for group in config:
         for key in config[group]:
             logging.debug(f"Config[{group}][{key}] = {config[group][key]}") 
-
-else:
-    logging.info("No configuration file present")
 
 # The only API function
 #

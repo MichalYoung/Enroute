@@ -4,8 +4,8 @@ Enroute.js
 
      Tracking randonneurs with Spot satellite trackers. 
      
-     Michal Young, 2014-2017.
-     This version September 2017. 
+     Michal Young, 2014-2017; June 2018.
+     This version July 2018. 
 
 Example usage (expand lists with more items): 
 
@@ -58,14 +58,16 @@ leaflet = require('leaflet');
 moment = require('moment');
 maki = require('./Leaflet.MakiMarkers.js');
 
-console.log("Constructor of August 2017");
+console.log("Constructor of July 2018");
 
 function Enroute(options) {
 
-    console.log("This is version of August 2017")
+    console.log("This is version of July 2018")
 
-    var riders = { };
-    var feeds = [ ];
+    var riders = { };    /* Personal *and* rental spots, maps to rider record */
+    var feeds = [ ];     /* Personal spots only, a list of gid */
+    /* The following was for Cascade 1200; might be useful again later? */
+    /* var tl_feeds = [ ];  Rental (TrackLeaders) spots  only, a list of esn */
 
     /* 
      * Fields in this object: 
@@ -110,8 +112,13 @@ function Enroute(options) {
     } else {
 	    console.log("No spot feeds requested");
     }
+
+    /* cascade.js processes tl_feeds here */
+    
     console.log("Riders: " + riders);
     console.log("Feeds: " + feeds);
+    // console.log("Trackleader feeds: " + tl_feeds)
+
 
     var utm_file = null;
     if ('utm_file' in options) {
@@ -140,12 +147,13 @@ function Enroute(options) {
     this.map = map;
     console.log("this.map defined")
 
-    L.tileLayer('https://{s}.tiles.mapbox.com/v3/{id}/{z}/{x}/{y}.png',
-    {
-        attribution: 'Map data <a href="https://mapbox.com">Mapbox</a>',
-        maxZoom: 18,
-        id: "michalyoung.kc01ifbj"        /* Get this from configuration */
-    }).addTo(this.map);
+    /* Taken directly from LeafletJS documentation */
+    L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+    attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+    maxZoom: 18,
+    id: 'mapbox.streets',
+    accessToken: 'pk.eyJ1IjoibWljaGFseW91bmciLCJhIjoiY2lwanpxdWE0MDF6d3RsbWRwcjVqMzZidCJ9.ac-iW8tr1skOOh2PMa5tkQ'
+}).addTo(map);
 
     this.landmark = function(lat, lon, options) {
         var icon = L.MakiMarkers.icon(
@@ -229,16 +237,47 @@ function Enroute(options) {
     /* We will always call the same URL to ask for updates 
      * on all the riders, so we'll calculate the 
      * spot request URL just once. 
-     */
+     *
+     * OBSOLETED June 2018 in favor for chunking
     var spot_query_url= app_root + "_riders";
     var parm_marker = "?feed=";
     for (var i=0; i < feeds.length; ++i) {
-	spot_query_url = spot_query_url + parm_marker + feeds[i];
-	parm_marker = "&feed=";
+	   spot_query_url = spot_query_url + parm_marker + feeds[i];
+	   parm_marker = "&feed=";
     }
-    console.log("Spot request URL will be " + spot_query_url);
+    console.log("Spot request URL will be " + spot_query_url + "(length " + spot_query_url.length + ")");
+    */
 
+    /* CHANGE:  With 25 spots, querying all in a batch with 2 second
+     * waits between (to stay within rate limits) can be so slow that we may time out.
+     * So, let's break this into smaller requests, up to 5 trackers at a time.
+     */
 
+    function chunk_spot_urls() { // Returns list of URL parameter strings for query_spot
+        var spot_chunks = [ ]; // A list of URL parameter strings
+        var spot_query_url= app_root + "_riders";
+        var parm_marker = "?feed=";
+        var cur_chunk = spot_query_url;
+        var chunk_spot_count = 0
+        for (var i=0; i < feeds.length; ++i) {
+            cur_chunk = cur_chunk + parm_marker + feeds[i];
+            parm_marker = "&feed="
+            chunk_spot_count += 1;
+            if (chunk_spot_count >= 5) {
+                spot_chunks.push(cur_chunk);
+                cur_chunk = spot_query_url;
+                chunk_spot_count = 0;
+                parm_marker = "?feed=";
+            }
+        }
+        if (chunk_spot_count > 0) {
+            spot_chunks.push(cur_chunk);
+        }
+        return spot_chunks;
+    }
+
+    var spot_urls_chunks = chunk_spot_urls();
+    console.log("Broke personal spots into " + spot_urls_chunks.length + " chunks")
     /* 
      * Expected format of spot observations is 
      * [ { id: spot_id,  latest: { spot observation data }, 
@@ -252,8 +291,10 @@ function Enroute(options) {
      * See end of this file. 
      */ 
     function query_spots() {
-	    console.log("Sending spot query: " + spot_query_url);
-	    $.getJSON(spot_query_url,
+	    for (i=0; i < spot_urls_chunks.length; ++i) {
+	    var query_url = spot_urls_chunks[i];
+	    console.log("Spot chunk " + i + " of " + spot_urls_chunks.length + ": "+ query_url);
+	    $.getJSON(query_url,
 	      function(observations) {
 		    console.log("Received spot data: " + observations + " length "
 			      + observations.length);
@@ -265,7 +306,39 @@ function Enroute(options) {
 		        show_track(obs);
 		    }
 	      });
+	     }
     }
+
+    // /* Similarly for trackleaders */
+    // var tl_query_url= app_root + "_tl_riders";
+    // parm_marker = "?feed=";
+    // for (var i=0; i < tl_feeds.length; ++i) {
+    // 	   tl_query_url = tl_query_url + parm_marker + tl_feeds[i];
+    // 	   parm_marker = "&feed=";
+    // }
+    // console.log("Trackleaders request URL will be " + tl_query_url + "(length " + tl_query_url.length + ")");
+
+
+    // /* We also poll trackleaders, at a different URL but otherwise treated
+    //  * similarly.
+    //  */
+    //  function query_tl_spots() {
+    // 	    console.log("Sending spot query: " + tl_query_url);
+    // 	    $.getJSON(tl_query_url,
+    // 	      function(observations) {
+    // 		    console.log("Received tl spot data: " + observations + " length "
+    // 			      + observations.length);
+    // 		    for (var i=0; i < observations.length; ++i) {
+    // 		        console.log("Observation #" + i + " of " +
+    // 				  observations.length);
+    // 		        var obs = observations[i];
+    // 		        console.log("Received observation of tl tracker " + obs.id);
+    // 		        show_track(obs);  /* Code in common with other spot tracks from here */
+    // 		    }
+    // 	      });
+    // }
+
+
 
 
     function show_track(obs) {
@@ -275,7 +348,7 @@ function Enroute(options) {
          */
 	    console.log("Show track: latest=" + JSON.stringify(obs.latest));
 	    show_position(obs.id, obs.latest);
-	    show_path(obs.id, obs.path);
+	    show_path(obs.id, obs.path); 
     }
 
     /* Create a marker if the rider doesn't already have one; 
@@ -335,12 +408,12 @@ function Enroute(options) {
 	    var lat = pos[0];
 	    var lng = pos[1];
 	    if (observation.hasOwnProperty("prior_position")) {
-	        prior_lat = observation.prior_position[0]
+	         prior_lat = observation.prior_position[0]
 	         prior_lng = observation.prior_position[1]
 	    } else {
 	         // Default values indicate we don't have a prior observation
 	        prior_lat = 0;
-	        prior_lon = 0;
+	        prior_lng = 0;
 	}
 	console.log("Querying for lat and lng " +
 		    lat + ", " + lng)
@@ -385,7 +458,7 @@ function Enroute(options) {
 	    if (rider.hasOwnProperty("distances")) {
 	      describe_progress_d( rider, observation, rider.distances );
 	    } else {
-	     describe_progress_t( rider, position, time );
+	      describe_progress_t( rider, position, time );
 	    }
     }
 
@@ -411,7 +484,9 @@ function Enroute(options) {
 
     var minutes = 1000 * 60;
     query_spots(); 
-    setInterval( query_spots, 2 * minutes ); 
+    setInterval( query_spots, 2 * minutes );
+    // query_tl_spots();
+    // setInterval( query_tl_spots, 1 * minutes )
 
 }
 
