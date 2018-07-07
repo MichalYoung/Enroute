@@ -17,8 +17,8 @@ import arrow
 import spot
 import measure
 import event_reader
-import device_assignments
-import trackleaders
+# import device_assignments
+# import trackleaders
 
 
 ###
@@ -26,17 +26,18 @@ import trackleaders
 ###
 app = flask.Flask(__name__)
 app.debug=config.get("debug")
-app.secret_key = config.get("app_key")
 app.logger.setLevel(logging.DEBUG)
 if app.debug:
     app.logger.setLevel(logging.DEBUG)
 
+# Secret stuff
+MAPBOX_TOKEN = config.get("mapbox_token")
+app.secret_key = config.get("app_key")
 
 # For configuration from spreadsheets
 UPLOAD_FOLDER = "UPLOADS"
 ALLOWED_EXTENSIONS = set(['xlsx'])
 SUSAN_PW = config.get("susan_pw")
-
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 ###
@@ -72,22 +73,26 @@ def checkin():
 @app.route('/fleche')
 def fleche():
     app.logger.debug("Fleche 2018")
+    publish_globals()
     return flask.render_template('fleche.html')
 
 @app.route('/alsea')
 def alsea():
     app.logger.debug("Alsea")
+    publish_globals()
     return flask.render_template('alsea.html')
 
 @app.route('/cascade')
 def cascade():
     app.logger.debug("Cascade 1200")
     event_record = event_reader.EventRecord("cascade")
-    spots = device_assignments.get_assignments()
+    # spots = device_assignments.get_assignments()
+    spots = [ ]
     app.logger.debug(f"event_record.landmarks: {event_record.landmarks}")
     if event_record.loaded:
         flask.g.event = event_record
         flask.g.spots = spots
+        publish_globals()
         return flask.render_template('cascade.html')
     else:
         return flask.render_template('404.html'), 404
@@ -99,6 +104,7 @@ def event(name=None):
     event_record = event_reader.EventRecord(name)
     if event_record.loaded:
         flask.g.event = event_record
+        publish_globals()
         return flask.render_template('event.html')
     else:
         return flask.render_template('404.html'), 404
@@ -283,18 +289,18 @@ def get_riders():
     return json.dumps(tracks)
 
 
-@app.route('/_tl_riders', methods=['GET'])
-def get_tl_riders():
-    """
-    Ajax request for rider tracks
-    """
-    app.logger.debug("Ajax request for trackleader riders ")
-    riders = flask.request.args.getlist("feed", type=str)
-    app.logger.debug("Getting trackleader feeds for {}".format(riders))
-    tracks = trackleaders.get_tracks(riders)
-    # return jsonify(result=result)
-    app.logger.debug("Sending tracks: |{}|".format(tracks))
-    return json.dumps(tracks)
+# @app.route('/_tl_riders', methods=['GET'])
+# def get_tl_riders():
+#     """
+#     Ajax request for rider tracks
+#     """
+#     app.logger.debug("Ajax request for trackleader riders ")
+#     riders = flask.request.args.getlist("feed", type=str)
+#     app.logger.debug("Getting trackleader feeds for {}".format(riders))
+#     tracks = trackleaders.get_tracks(riders)
+#     # return jsonify(result=result)
+#     app.logger.debug("Sending tracks: |{}|".format(tracks))
+#     return json.dumps(tracks)
 
 
 
@@ -317,6 +323,12 @@ def get_tl_riders():
 # Functions used by routes
 #
 ##################
+
+def publish_globals():
+    """Global values that should be available through
+    the g object. 
+    """
+    flask.g.mapbox_token = MAPBOX_TOKEN
 
 def load_points(file_path):
     """Track points as an object that we can plug 
