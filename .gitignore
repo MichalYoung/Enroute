@@ -4,4 +4,6 @@ __pycache__
 .idea/
 exp
 env
+config_private.ini
+
 

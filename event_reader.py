@@ -96,12 +96,13 @@ class EventRecord(object):
 
     def _row_landmark(self, row: list):
         """Landmarks can be control, overnight, info-control, 
-        or summit. 
+        food, or summit. 
         """
         icons = { "control": "library",
                 "overnight": "lodging",
                 "info-control": "marker",
-                "summit": "triangle"
+                "summit": "triangle",
+                "food": "restaurant"
                 }
         if len(row) < 4:
             row.append("")
@@ -123,7 +124,8 @@ class EventRecord(object):
             "control": self._row_landmark,
             "summit": self._row_landmark,
             "info-control": self._row_landmark,
-            "overnight": self._row_landmark
+            "overnight": self._row_landmark,
+            "food": self._row_landmark
             }
         path = "events/{}.csv".format(self.name)
         try:

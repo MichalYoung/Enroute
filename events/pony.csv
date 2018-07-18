@@ -1,0 +1,6 @@
+event,Willamette Valley Dog and Pony Show,,,
+route,pony,Dog and Pony Show, #196666,
+#Spot tracks,Track name,Rider Name,Device GID,Icon color
+spot,pony,Michal Young,0GiLP5jn9iVj8z8qm90QaTnkpygdAmouk,#1019ba
+spot,pony,Susan Otcenas,00cDBSznguqOjfiTBUdqdEl9pldbz1OSa,#EB1313
+#Landmarks,Lat,Lon,Title,Desc
