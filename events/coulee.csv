@@ -29,7 +29,7 @@ control,44.32731862,-91.91905183,Control - Alma Kwik Trip,
 control,44.5115177,-92.9063159,Control - Riverside Park,
 control,43.20660886,-90.57190006,Control - Blue River Citgo,
 ,,,,
-spot tracks,Track name,Rider Name,Device GID,Icon color
+#spot tracks,Track name,Rider Name,Device GID,Icon color
 ,,,,
 spot,coulee,Christian Rasmussen,0tsdR69ip84PiAXFiq8Wh5V83LMfyrpNs,#003366
 spot,coulee,Christopher Pearson,0gGIBbVZGzB02NJYulTsDZrCryGfz4pKE,#0099cc
