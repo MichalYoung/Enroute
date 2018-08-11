@@ -129,7 +129,7 @@ class EventRecord(object):
             }
         path = "events/{}.csv".format(self.name)
         try:
-            with open(path, newline="") as csvfile:
+            with open(path, newline="", encoding="utf-8", errors="replace") as csvfile:
                 log.debug(f"Successfully opened '{path}' as CSV file")
                 reader = csv.reader(csvfile)
                 for row in reader:

@@ -1,0 +1,46 @@
+event,"Coulee Challenge 1200, 2018",,,
+# SIR Cascade 1200 2018,,Event name,,
+route,coulee,Coulee Challenge,#196666,
+,,,,
+,,,,
+#Landmarks,Lat,Lon,Title,Desc
+control,44.78037251,-92.15154737,Control - Elmwood Cenex,
+control,44.25046196,-91.47294044,Control - Arcadia Kwik Trip,
+overnight,44.2947003,-90.82892597,Control - Black River Falls Days Inn,
+control,43.89060862,-91.07508838,Control - West Salem BP,
+control,43.18895119,-90.07269859,Control - Spring Green Shell,
+control,43.57516626,-90.88805795,Control - Kwik Trip Viroqua,
+control,43.89839722,-91.09974325,Control - West Salem,
+control,43.95051378,-91.25881433,Control - Kwik Trip Holmen,
+control,44.44299381,-92.27506042,Control - Lake City Kwik Trip,
+control,44.73293846,-93.21620846,Control - Start,
+control,44.73287182,-93.21607172,Control - Finish,
+control,44.56293042,-92.54180799,Control 28 - Kwik Trip,
+control,44.44034237,-92.14472411,Control - Pepin BP,
+control,43.55071761,-90.88879301,Control - Viroqua Kwik Trip,
+control,43.82857415,-90.62044979,Control - 71 Express Norwalk,
+control,43.3346287,-90.38865745,Control - Kwik Trip,
+overnight,43.53251566,-89.97747007,Control - Quality Inn,
+control,44.50692426,-92.91606581,Control - Cannon Falls Caseys,
+control,44.56277017,-92.54170111,Control 4 - Kwik Trip Red Wing,
+overnight,44.05692213,-91.68726787,Control - AmericInn Hotel Winona,
+control,44.16073353,-92.16591726,Control - Kwik Trip Plainview,
+control,44.32731862,-91.91905183,Control - Alma Kwik Trip,
+control,44.5115177,-92.9063159,Control - Riverside Park,
+control,43.20660886,-90.57190006,Control - Blue River Citgo,
+,,,,
+#spot tracks,Track name,Rider Name,Device GID,Icon color
+,,,,
+spot,coulee,Christian Rasmussen,0tsdR69ip84PiAXFiq8Wh5V83LMfyrpNs,#003366
+spot,coulee,Christopher Pearson,0gGIBbVZGzB02NJYulTsDZrCryGfz4pKE,#0099cc
+spot,coulee,Daniel Ridings,0fSOrsp54UKDfoLTf5buu6gRMzvzNkvZ6,#0000ff
+#spot,coulee,Gregory Smith,0xFPRYhEfLF5IeSB87RAeYS5kiqZDVyXt,#339966
+spot,coulee,Jeff Newberry,0Zk0hGnqrKqp5GmOqnIJTTJ19QNazokRq,#6666ff
+spot,coulee,Matt Roy,0zCH1Ie39FvnqtmxItd39g6qF6Fszjiqn,#6600cc
+spot,coulee,Robert Couperthwaite,1FOlxfv5Yb6GrcHt9604GAeKUH521qUFn,#9933ff
+spot,coulee,Russell Dorobek,04Yfb0y9ablVZPpn7P2MF4baRWC1zOS6P,#9999ff
+spot,coulee,Lane Coddington,0Km7Coj5sls6vCQ6iZxUR8U1zkO9qvoPE,#66ccff
+spot,coulee,Karel Stroethoff,0urcNVYDKhbaZz4zyKpbVP79TXoSavY02,#00cc66
+#preride,coulee,Steve Fuller,0kvVnWNipgWTip9OKUkQpQL7ugQxaHqgL,#037CA4
+spot,coulee,Bill Watts,0PsSNYHzt5hOcJSb5yEgWrSqhrHPUHGBK,#006600
+spot,coulee,Ian Shopland,0IVdp3Sgg4Rq2lJTfGqBaBvDcbdk6UzFJ,#cc3300

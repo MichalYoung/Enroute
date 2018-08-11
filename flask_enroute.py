@@ -50,7 +50,7 @@ def root():
     try:
         root = config.get("root")
         app.logger.debug(f"config returned rooot '{root}'")
-        return flask.redirect(flask.url_for(root))
+        return flask.redirect(root)
     except Exception as e:
         app.logger.debug(f"Exception {e} looking for root in config")
         app.logger.debug("No root configured")
