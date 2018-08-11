@@ -475,13 +475,17 @@ function Enroute(options) {
 	    var name = rider.name;
         var bicon = L.MakiMarkers.icon({icon: "bicycle",
 					color: color, size: "m"});
+	var bicon_expired = L.MakiMarkers.icon({icon: "bicycle",
+					color: "#cccccc" , size: "m"});
         var marker = L.marker(position,
 			      {  title: name,
 				     icon: bicon,
 				     riseOnHover: true,
 			      }).addTo(map);
-	    rider.marker = marker;
-	    return marker;
+	rider.marker = marker;
+	rider.bicon = bicon;
+	rider.bicon_expired = bicon_expired;
+	return marker;
     }
 
     /* Given an ISO time string, return a humanized description */ 
@@ -508,12 +512,29 @@ function Enroute(options) {
 	    return desc;
     }
 
+    /* We will consider "recently active" to be "active 
+     * less than 1 day ago."  This is arbitrary and 
+     * subject to change. 
+     */
+    function is_recent(time) {
+	var recency_limit = moment().subtract(1, 'days'); 
+	var then = moment(time);
+	return then.isAfter(recency_limit);
+    }
+	
+
     /* Describe progress including distance along path */ 
     function describe_progress_d(rider, observation, distances) {
-	    console.log("describe_progress_d for rider " + rider.name);
-	    ensure_marker(rider);
-	    var marker = rider.marker;
-	    var time = observation.dateTime;
+	console.log("describe_progress_d for rider " + rider.name);
+	ensure_marker(rider);
+	var marker = rider.marker;
+	var time = observation.dateTime;
+	if (is_recent(time)) {
+	    rider.marker.setIcon(rider.bicon);
+	} else {
+	    rider.marker.setIcon(rider.bicon_expired);
+	}
+	
         var pos = observation.latlon; 
 	    /* pos is NOT a latlng object; it's a list of two elements */
 	    var lat = pos[0];
