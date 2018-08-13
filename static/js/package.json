@@ -2,8 +2,10 @@
     "name": "enroute",
     "version": "2.0.0",
     "dependencies": {
-	"moment" : "*",
-	"leaflet": "*",
-	"browserify": "*"
+        "@mapbox/maki": "^4.0.0",
+        "browserify": "*",
+        "leaflet": "*",
+        "maki": "^2.1.0",
+        "moment": "*"
     }
 }

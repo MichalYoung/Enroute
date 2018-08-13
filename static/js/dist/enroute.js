@@ -176,6 +176,7 @@ function Enroute(options) {
     console.log("This is version of July 2018")
 
     var riders = { };    /* Personal *and* rental spots, maps to rider record */
+    this.riders = riders; /* Accessible to sidebar */ 
     var feeds = [ ];     /* Personal spots only, a list of gid */
     /* The following was for Cascade 1200; might be useful again later? */
     /* var tl_feeds = [ ];  Rental (TrackLeaders) spots  only, a list of esn */

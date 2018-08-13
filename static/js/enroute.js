@@ -65,6 +65,7 @@ function Enroute(options) {
     console.log("This is version of July 2018")
 
     var riders = { };    /* Personal *and* rental spots, maps to rider record */
+    this.riders = riders; /* Accessible to sidebar */ 
     var feeds = [ ];     /* Personal spots only, a list of gid */
     /* The following was for Cascade 1200; might be useful again later? */
     /* var tl_feeds = [ ];  Rental (TrackLeaders) spots  only, a list of esn */
@@ -361,7 +362,7 @@ function Enroute(options) {
 	    console.log("Creating a new marker for " + rider.name +
 		    " at " + position); 
         var color = rider.color;
-	    var name = rider.name;
+	var name = rider.name;
         var bicon = L.MakiMarkers.icon({icon: "bicycle",
 					color: color, size: "m"});
 	var bicon_expired = L.MakiMarkers.icon({icon: "bicycle",

@@ -109,6 +109,18 @@ def event(name=None):
     else:
         return flask.render_template('404.html'), 404
 
+# Experimental support of sidebar
+@app.route('/event2/<name>')
+def event2(name=None):
+    app.logger.debug(f"Looking for {name}'")
+    event_record = event_reader.EventRecord(name)
+    if event_record.loaded:
+        flask.g.event = event_record
+        publish_globals()
+        return flask.render_template('event2.html')
+    else:
+        return flask.render_template('404.html'), 404
+
 
 @app.route('/along')
 def along():

@@ -1,0 +1,128 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html> <head>
+<title>{{g.event.title}}</title>
+ <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css"
+   integrity="sha512-M2wvCLH6DSRazYeZRIm1JnYyh22purTM+FDB5CsyxtQJYeKq83arPe5wgbNmcFXGqiSH2XR8dT/fJISVA1r/zQ=="
+crossorigin=""/>
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<style>
+body {
+    padding: 0;
+    margin: 0;
+}
+html, body, #map {
+    height: 100%;
+}
+.rider-icon { background-color: #00cc00;
+               color: #ff0000;
+               width: auto; }
+}
+#sidebar {                  
+   height: 30ex;
+}
+
+</style>
+<script
+  src="https://code.jquery.com/jquery-3.2.1.min.js"
+  integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+  crossorigin="anonymous"></script>
+</head>
+<link rel="stylesheet"
+  href="{{url_for("static",filename="css/leaflet-sidebar.min.css")}}" />
+<body>
+
+<!-- *******************************************
+     The sidebar precedes the map in the html
+     ******************************************* -->
+<div id="sidebar" class="leaflet-sidebar collapsed">
+        <!-- Nav tabs -->
+        <div class="leaflet-sidebar-tabs">
+            <ul role="tablist">
+                <li><a href="#choose" role="tab">
+                Find rider
+              </a></li>
+            </ul>
+        </div> <!-- leaflet-sidebar-tabs --> 
+        <!-- Tab panes -->
+        <div class="leaflet-sidebar-content">
+            <div class="leaflet-sidebar-pane" id="choose">
+                <p class="leaflet-sidebar-header">
+                   Rider
+                    <span class="leaflet-sidebar-close"><i class="fa fa-caret-left"></i></span>
+	      </p>
+	      {% for rider in g.event.riders %}
+	      <p><button class="rider-select" value="{{rider.spot}}"
+	      >{{rider.rider}}</button></p>
+	      {% endfor %}
+	    </div> <!-- leaflet-sidebar-pane -->
+	</div> <!-- leaflet-sidebar-content -->
+</div> <!-- leaflet-sidebar -->
+<!-- *******************************************
+     End of sidebar, map comes next
+     ******************************************* -->
+<div id="map" style="height: 100%;"></div>
+<div id="log"></div>
+
+<script src="{{url_for("static",filename="js/dist/enroute.js")}}"></script>
+<script src="{{url_for("static",filename="js/leaflet-sidebar.js")}}"></script>
+
+<script>
+
+var options = {
+mapbox_token: "{{g.mapbox_token}}", 
+spot_feeds: [
+    {% for rider in g.event.riders %}
+    {  feed: "{{rider.spot}}",
+        name: "{{rider.rider}}",
+        color: "{{ rider.color }}",
+        distances: "{{rider.route}}_dists.json"
+    },
+    {%  endfor %}
+    ],
+
+    routes:  [
+        {%  for route in g.event.routes %}
+        { points: "{{route.abbrev}}_points.json",
+               distances: "{{route.abbrev}}_dists.json",
+               color:  "#196666",
+               name: "{{route.name}}",
+               zoomto: true
+               },
+        {%  endfor %}
+        ]
+}; 
+var tracking = new Enroute(options);
+
+
+{% for place in g.event.landmarks %}
+   tracking.landmark({{place.lat}}, {{place.lon}}, 
+               {  popup: "{{place.title}}<br />{{place.desc}}",
+                  icon: "{{place.icon}}",
+                  color: "{{place.color}}", 
+                  title: "{{place.title}}"
+                   });
+{% endfor %}
+
+var sidebar = L.control.sidebar({ container: 'sidebar' })
+   .addTo(tracking.map)
+   .open('choose');
+
+$(".rider-select").click(function(selection) {
+   console.log("thisl.value is " + this.value);
+   var rider_spot = this.value;
+   console.log("Looking for rider with spot '" + rider_spot +"'");
+   console.log("Riders is " + tracking.riders);
+   if (tracking.riders.hasOwnProperty(rider_spot)
+      && tracking.riders[rider_spot].hasOwnProperty("marker")) {
+         tracking.riders[rider_spot].marker.openPopup();
+   } else {
+       alert("No track for this rider yet");
+   }
+   });
+
+
+
+</script>
+
+</body> </html>
