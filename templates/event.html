@@ -17,20 +17,55 @@ html, body, #map {
 .rider-icon { background-color: #00cc00;
                color: #ff0000;
                width: auto; }
-         }
+}
+#sidebar {                  
+   height: 30ex;
+}
+
 </style>
 <script
   src="https://code.jquery.com/jquery-3.2.1.min.js"
   integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
   crossorigin="anonymous"></script>
 </head>
-
+<link rel="stylesheet"
+  href="{{url_for("static",filename="css/leaflet-sidebar.min.css")}}" />
 <body>
 
+<!-- *******************************************
+     The sidebar precedes the map in the html
+     ******************************************* -->
+<div id="sidebar" class="leaflet-sidebar collapsed">
+        <!-- Nav tabs -->
+        <div class="leaflet-sidebar-tabs">
+            <ul role="tablist">
+                <li><a href="#choose" role="tab">
+                Find rider
+              </a></li>
+            </ul>
+        </div> <!-- leaflet-sidebar-tabs --> 
+        <!-- Tab panes -->
+        <div class="leaflet-sidebar-content">
+            <div class="leaflet-sidebar-pane" id="choose">
+                <p class="leaflet-sidebar-header">
+                   Rider
+                    <span class="leaflet-sidebar-close"><i class="fa fa-caret-left"></i></span>
+	      </p>
+	      {% for rider in g.event.riders %}
+	      <p><button class="rider-select" value="{{rider.spot}}"
+	      >{{rider.rider}}</button></p>
+	      {% endfor %}
+	    </div> <!-- leaflet-sidebar-pane -->
+	</div> <!-- leaflet-sidebar-content -->
+</div> <!-- leaflet-sidebar -->
+<!-- *******************************************
+     End of sidebar, map comes next
+     ******************************************* -->
 <div id="map" style="height: 100%;"></div>
 <div id="log"></div>
 
-<script src="{{url_for("static", filename="js/dist/enroute.js")}}"></script>
+<script src="{{url_for("static",filename="js/dist/enroute.js")}}"></script>
+<script src="{{url_for("static",filename="js/leaflet-sidebar.js")}}"></script>
 
 <script>
 
@@ -68,6 +103,27 @@ var tracking = new Enroute(options);
                   title: "{{place.title}}"
                    });
 {% endfor %}
+
+var sidebar = L.control.sidebar({ container: 'sidebar' })
+   .addTo(tracking.map)
+   .open('choose');
+
+$(".rider-select").click(function(selection) {
+   console.log("thisl.value is " + this.value);
+   var rider_spot = this.value;
+   console.log("Looking for rider with spot '" + rider_spot +"'");
+   console.log("Riders is " + tracking.riders);
+   if (tracking.riders.hasOwnProperty(rider_spot)
+      && tracking.riders[rider_spot].hasOwnProperty("marker")) {
+         var marker = tracking.riders[rider_spot].marker;
+         var where = marker.getLatLng();
+         tracking.map.panTo(where);
+         marker.openPopup();
+   } else {
+       alert("No track for this rider yet");
+   }
+   });
+
 
 
 </script>
