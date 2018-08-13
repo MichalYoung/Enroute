@@ -115,7 +115,10 @@ $(".rider-select").click(function(selection) {
    console.log("Riders is " + tracking.riders);
    if (tracking.riders.hasOwnProperty(rider_spot)
       && tracking.riders[rider_spot].hasOwnProperty("marker")) {
-         tracking.riders[rider_spot].marker.openPopup();
+         var marker = tracking.riders[rider_spot].marker;
+         var where = marker.getLatLng();
+         tracking.map.panTo(where);
+         marker.openPopup();
    } else {
        alert("No track for this rider yet");
    }
