@@ -3,11 +3,12 @@ events/event_name.csv
 """
 
 import csv
+import argparse
 
 import logging
 logging.basicConfig()
 log = logging.getLogger(__name__)
-log.setLevel(logging.DEBUG)
+log.setLevel(logging.INFO)
 
 class SpotTrack(object):
     """Record of a rider with a Spot tracker"""
@@ -136,14 +137,13 @@ class EventRecord(object):
                     log.debug(f"Processing row {row}")
                     if len(row) == 0:
                         continue
-                    if row[0].strip().startswith("#"):
+                    command = row[0].strip()
+                    if command == "" or command.startswith("#"):
                         continue
                     # Content row. 
-                    if row[0] in handlers:
-                        handler = handlers[row[0]]
+                    if command in handlers:
+                        handler = handlers[command]
                         handler(row)
-                    elif row[0] == "":
-                        continue
                     else:
                         log.debug(f"Didn't recognize commend {row}")
                         self.errmsg = f"Unrecognized command: {row}"
@@ -165,6 +165,26 @@ class EventRecord(object):
 
 
 
+def cli():
+    """Command line args (for testing)"""
+    parser = argparse.ArgumentParser("Test parsing the event configuration file")
+    parser.add_argument("event", help="Name of the event; should match events/<eventname>.csv")
+    args = parser.parse_args()
+    return args
+
+def main():
+    """Test parsing an event configuration file"""
+    args = cli()
+    event = EventRecord(args.event)
+    if event.loaded:
+        print("Loaded successfully")
+        print(f"Landmarks: {event.landmarks} ")
+        print(f"Riders: {event.riders}")
+    else:
+        print("Event load failed")
+
+if __name__ == "__main__":
+    main()
 
 
 
