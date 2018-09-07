@@ -31,6 +31,6 @@ for waypoint in gpx.waypoints:
     desc = waypoint.comment or waypoint.description or "No description"
     if (pattern in waypoint.name.lower() or
         pattern in desc.lower()):
-        print("{},{}  '{}' '{}'".format(
+        print("{},{},'{}','{}'".format(
             waypoint.latitude, waypoint.longitude,
             waypoint.name, desc))
