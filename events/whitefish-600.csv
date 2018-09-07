@@ -1,4 +1,4 @@
-event,Big Guns 600k Walla Wall to Whitefish,,,
+event,Big Guns 600k Walla Walla to Whitefish,,,
 route,whitefish,Walla Wall to Whitefish,#ff6600,
 #route,whitefish1,Walla Wall day 1,#6600cc,
 #route,whitefish2,Walla Wall day 2,#196666,
@@ -10,7 +10,7 @@ route,whitefish,Walla Wall to Whitefish,#ff6600,
 #spot tracks,Track name,Rider Name,Device GID,Icon color
 ,,,,
 spot,whitefish,Jan Acuff,0YlyNu3iADMdJWV3ejbpOu1hoFsJ8DtTn,#003366
-,,,,
+spot,whitefish,Norm Carr,00cDBSznguqOjfiTBUdqdEl9pldbz1OSa,#cc3300
 ,,,,
 control,46.06896502,-118.33915,"START Control: Public Parking Lot, corner of N. Colville ST & E Sumach St, Walla Walla, WA",
 control,46.61428584,-117.7912945,"STAFFED SUPPORT STOP (Not a control) with WATER, ON LEFT.  Follow signs to Garfield County Port. Restrooms (no water) to left past silos, at boat launch. ",
