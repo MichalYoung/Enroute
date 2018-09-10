@@ -1,0 +1,24 @@
+event,Crater Lake 1000k
+route,crater,Crater Lake 1000k,#ff6600
+,,,,
+#Landmarks,Lat,Lon,Title,Desc
+#control,44.78037251,-92.15154737,Control - Elmwood Cenex,
+#overnight,44.2947003,-90.82892597,Control - Black River Falls Days Inn,
+,,,,
+#spot tracks,Track name,Rider Name,Device GID,Icon color
+,,,,
+spot,crater,Jamie Van Beek,0VHnEtqWxjbqfgUXmyaqg61CJTOGmKVh1,#003366
+spot,crater,Keith,0p48pzpd24aJvEhJbtZFLbALdgIJ3mqo9,#cc3300
+,,,,
+control,47.23829,-123.40657,"INFO CONTROL - MATLOCK - Matlock General Store - 17490 W Shelton Matlock Rd",""
+control,46.68337881,-123.7287298,"CONTROL - RAYMOND - Chevron - 622 Heath St, return back toward US-101",""
+control,46.10487,-123.86651,"INFO CONTROL - FORT CLATSOP - On right at intersection of Ft Clatsop Rd and Loukas lane - after control",""
+control,45.89769184,-123.9608892,"CONTROL - CANNON BEACH - Mariner Market or OPEN - 139 N Hemlock St",""
+overnight,45.10242703,-123.9824067,"CONTROL NESKOWIN - Proposal Rock Inn / OPEN 09/14 12:42 / CLOSE 09/15 03:48",""
+control,45.0637091,-123.9128008,"INFO CONTROL SLAB CREEK - Slab Creek Rd and Cascade Trace - on right at intersection with Cascade Trace under street light)",""
+control,44.44609,-124.03975,"INFO CONTROL - BAYVIEW - S Beaver Creek Rd & N Bayview Rd - info control is straight ahead; after control turn right onto N Bayview Rd at stop sign / T",""
+control,43.69874,-124.11141,"CONTROL - REEDSPORT - Safeway / OPEN - 1499 Highway Ave. Reedsport",""
+control,43.52981,-123.64304,"INFO CONTROL - CAMP CREEK - Camp Creek summit - after info control continue straight onto Tyee Access Rd / Rd 25-7-5-1 at yield sign heading downhill",""
+overnight,43.22833143,-123.3638093,"CONTROL - ROSEBURG - Best Western Garden Villa Inn -ÊOPEN 09/14 23:27 / CLOSE 09/16 03:23 NOTE NO SERVICES except water until Diamond Lake",""
+control,42.90985,-122.14184,"CONTROL - CRATER LAKE - Crater Lake Lodge or Rim Village Cafe / Gift Shop - UNTIMED - after control return back to Rim Dr",""
+control,42.21113962,-121.7566511,"CONTROL - KLAMATH FALLS",""
