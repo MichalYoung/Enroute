@@ -403,11 +403,12 @@ function Enroute(options) {
     }
 
     /* We will consider "recently active" to be "active 
-     * less than 1 day ago."  This is arbitrary and 
-     * subject to change. 
+     * less than 2 hours ago."  This is arbitrary and 
+     * subject to change. FIXME: It should be a parameter for 
+     * the module and for individual riders.  
      */
     function is_recent(time) {
-	var recency_limit = moment().subtract(1, 'days'); 
+	var recency_limit = moment().subtract(2, 'hours'); 
 	var then = moment(time);
 	return then.isAfter(recency_limit);
     }

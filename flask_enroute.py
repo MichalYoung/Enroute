@@ -100,13 +100,15 @@ def cascade():
 # Let's try to generalize the event rides ...
 @app.route('/event/<name>')
 def event(name=None):
-    app.logger.debug(f"Looking for {name}'")
+    app.logger.debug(f"Looking for event {name}'")
     event_record = event_reader.EventRecord(name)
     if event_record.loaded:
+        app.logger.debug(f"Successfully loaded configuration for {name}")
         flask.g.event = event_record
         publish_globals()
         return flask.render_template('event.html')
     else:
+        app.logger.debug(f"Failed to load event config, falling back to 404")
         return flask.render_template('404.html'), 404
 
 # Experimental support of sidebar

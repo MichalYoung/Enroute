@@ -1,0 +1,24 @@
+event,Big Guns 600k Walla Walla to Whitefish,,,
+route,whitefish,Walla Wall to Whitefish,#ff6600,
+#route,whitefish1,Walla Wall day 1,#6600cc,
+#route,whitefish2,Walla Wall day 2,#196666,
+,,,,
+#Landmarks,Lat,Lon,Title,Desc
+#control,44.78037251,-92.15154737,Control - Elmwood Cenex,
+#overnight,44.2947003,-90.82892597,Control - Black River Falls Days Inn,
+,,,,
+#spot tracks,Track name,Rider Name,Device GID,Icon color
+,,,,
+spot,whitefish,Jan Acuff,0YlyNu3iADMdJWV3ejbpOu1hoFsJ8DtTn,#003366
+spot,whitefish,Norm Carr,00cDBSznguqOjfiTBUdqdEl9pldbz1OSa,#cc3300
+spot,whitefish,Kate Hotler,0fWG8foCOILBE4jaqCmfBDr5LJahqqTKZ,#0066ff
+,,,,
+,,,,
+control,46.06896502,-118.33915,"START Control: Public Parking Lot, corner of N. Colville ST & E Sumach St, Walla Walla, WA",
+control,46.61428584,-117.7912945,"STAFFED SUPPORT STOP (Not a control) with WATER, ON LEFT.  Follow signs to Garfield County Port. Restrooms (no water) to left past silos, at boat launch. ",
+control,46.89078416,-117.3642452,"OPEN CONTROL: COLFAX, WA. (Elevation 1972)",
+control,47.33308134,-116.8879864,"OPEN CONTROL: Plummer, ID. All services. (Elevation 2740)",
+control,47.55996253,-116.2515678,STAFFED CONTROL: Trailhead parking lot at intersection with Coeur dAlene River Rd/NF-9 (Enaville).  There are NO services for most riders until Thompson Falls at mile 250.,
+overnight,47.59521095,-115.3529178,"OVERNIGHT CONTROL: Falls Motel, S.Gallatin St., Thompson Falls, MT. (Elevation 2425).",
+control,48.01990444,-114.2247647,"OPEN CONTROL: Lakeside, MT (Elevation 2909 feet). All services including Dairy Queen, convenience stores, etc.",
+control,48.41258435,-114.33671,"FINISH CONTROL: Depot Park, Whitefish MT. Corner Railway Street & Central Ave. ",

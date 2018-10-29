@@ -1,6 +1,13 @@
 """
 Measure distances along a path represented as lat-lon pairs. 
 (Experimental August 2017)c
+
+BUG: 
+[2018-08-26 14:37:00 +0000] [8] [ERROR] Error handling request /_along?lat=37.01146&lng=-121.79366&prior_lat=37.0043&prior_lng=-121.79524&track=cccr_dists.json
+
+2018-08-26T14:37:00.563436+00:00 app[web.1]:   File "/app/measure.py", line 248, in interpolate_route_distance
+2018-08-26T14:37:00.563438+00:00 app[web.1]:     frac = (close_east - east_1) / (east_2 - east_1)
+2018-08-26T14:37:00.563475+00:00 app[web.1]: ZeroDivisionError: division by zero
 """
 
 import geopy.distance
@@ -245,7 +252,13 @@ def interpolate_route_distance(lat, lon, utm_track, utm_zone, prior_obs=None):
             min_deviance = dev_sqr
             _, _, from_dist = prev
             _, _, to_dist = pt
-            frac = (close_east - east_1) / (east_2 - east_1)
+            # Divide by zero must be avoided here:
+            if abs(east_2 - east_1) > 0.1 :
+                frac = (close_east - east_1) / (east_2 - east_1)
+            elif abs(north_2 - north_1) > 0.1 :
+                frac = (close_north - north_1) / (north_2 - north_1)
+            else:
+                fract = 1.0;
             #log.debug("Interpolating distance at {:2,f} between ".format(frac))
             #log.debug("   between {:2,f}km and {:2,f}km"
             #              .format(from_dist, to_dist))
