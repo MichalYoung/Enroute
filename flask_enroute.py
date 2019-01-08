@@ -100,7 +100,7 @@ def cascade():
 # Let's try to generalize the event rides ...
 @app.route('/event/<name>')
 def event(name=None):
-    app.logger.debug(f"Looking for event {name}'")
+    app.logger.debug(f"Looking for event '{name}'")
     event_record = event_reader.EventRecord(name)
     if event_record.loaded:
         app.logger.debug(f"Successfully loaded configuration for {name}")
