@@ -79,6 +79,7 @@ class EventRecord(object):
         """Map a route name to route files"""
         log.debug(f"'route' record, row={row}")
         if len(row) == 3:
+            log.debug("No color specified, setting default")
             row.append("#196666") # Default path color
         command, abbrev, name, color = row[0:4]
         route = Route(abbrev, name, color)
