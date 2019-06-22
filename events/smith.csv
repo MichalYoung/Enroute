@@ -2,9 +2,9 @@ event,Smith River 300k,,,
 # Eden's Gate 2018,,Event name,,
 route,smith300,Smith River 300k,,
 #Spot tracks,Track name,Rider Name,Device GID,Icon color
-spot,smith300,Susan Otcenas,0GiLP5jn9iVj8z8qm90QaTnkpygdAmouk,#4b42f4
+spot,smith300,Keith Kohan,0GiLP5jn9iVj8z8qm90QaTnkpygdAmouk,#4b42f4
 #spot,Smith,Bill Bryant,0bXQULJFpl0gcZzZ2hqtYXxf1u1T7EQTV,#53c19c
-#spot,eden,Seth Dubois,06pTvMt620keCnemuFP6j0zJn5oAKJq6q,#2e9c00
+#spot,smith300,Chris Archibald,0cImVvAOOWZYHSRRyjCtPI1LIkoDrdz0g,#000000
 ,,,,
 control,43.97295891,-124.1041696,Florence control',
 control,43.69859632,-124.1098022,'Reedsport control',
