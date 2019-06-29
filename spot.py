@@ -72,7 +72,8 @@ import os
 import json
 import arrow
 import time
-import urllib.request
+# import urllib.request  # Obsolete
+import requests          # Currently version 2.8; 3 out soon
 import config
 from pymongo import MongoClient
 
@@ -211,9 +212,13 @@ def spot_feed(feed_id,empty_exception=False):
         exception is raised with the Spot error message. 
     """
     URL= URL_API.format(feed_id)
-    response = urllib.request.urlopen(URL)
-    txt = response.read().decode("utf-8")
-    data=json.loads(txt)
+    # Old style http request:
+    # response = urllib.request.urlopen(URL)
+    # txt = response.read().decode("utf-8")
+    # data=json.loads(txt)
+    # Using requests library:
+    r = requests.get(URL)
+    data = r.json()
     if "errors" in data["response"]:
         msg = data["response"]["errors"]["error"]["description"]
         if "No displayable messages" in msg and not empty_exception:
